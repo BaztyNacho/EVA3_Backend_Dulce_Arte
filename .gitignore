@@ -1,0 +1,23 @@
+# Herramientas de IA (configuración local)
+.agents/
+.claude/
+.impeccable/
+.playwright/
+skills-lock.json
+
+# Secretos: NUNCA subir
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Editor y sistema
+.vscode/
+Thumbs.db
