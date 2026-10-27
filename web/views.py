@@ -115,7 +115,7 @@ def pedidos_lista(request):
 
 @rol_requerido()
 def pedido_nuevo(request):
-    productos = Producto.objects.filter(activo=True).order_by('categoria', 'nombre')
+    productos = Producto.objects.filter(activo=True).prefetch_related('opciones').order_by('categoria', 'nombre')
     opciones = OpcionPersonalizacion.objects.filter(activo=True)
     fecha_minima = timezone.localtime() + Pedido.ANTICIPACION_MINIMA + timedelta(minutes=5)
     return render(request, 'web/pedido_nuevo.html', {
@@ -126,6 +126,7 @@ def pedido_nuevo(request):
                 'categoria': p.get_categoria_display(),
                 'precio': p.precio_base,
                 'imagen': p.imagen.url if p.imagen else '',
+                'opciones': [o.pk for o in p.opciones.all() if o.activo],
             }
             for p in productos
         ],

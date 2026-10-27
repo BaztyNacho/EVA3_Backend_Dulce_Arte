@@ -149,11 +149,20 @@ class ProductoAdmin(admin.ModelAdmin):
 
 @admin.register(OpcionPersonalizacion)
 class OpcionPersonalizacionAdmin(admin.ModelAdmin):
-    list_display = ['nombre', 'insumo', 'cantidad_por_porcion', 'precio_formateado', 'activo']
-    list_filter = ['activo']
+    list_display = ['nombre', 'insumo', 'cantidad_por_porcion', 'precio_formateado', 'productos_lista', 'activo']
+    list_filter = ['activo', 'productos']
     search_fields = ['nombre', 'insumo__nombre']
     list_editable = ['activo']
     autocomplete_fields = ['insumo']
+    filter_horizontal = ['productos']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('productos')
+
+    @admin.display(description='Se ofrece en')
+    def productos_lista(self, obj):
+        nombres = [p.nombre for p in obj.productos.all()]
+        return ', '.join(nombres) if nombres else etiqueta('Ningún producto', '#FFF1D6', '#8A5A00')
 
     @admin.display(description='Precio por porción', ordering='precio_por_porcion')
     def precio_formateado(self, obj):

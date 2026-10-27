@@ -71,6 +71,16 @@ class DetallePedidoSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('No repitas la misma opción en un producto.')
         return personalizaciones
 
+    def validate(self, attrs):
+        # Regla de negocio: cada producto solo acepta sus propios extras.
+        producto = attrs.get('producto')
+        for perso in attrs.get('personalizaciones', []):
+            if not perso['opcion'].productos.filter(pk=producto.pk).exists():
+                raise serializers.ValidationError({
+                    'personalizaciones': f'"{perso["opcion"].nombre}" no está disponible para {producto.nombre}.'
+                })
+        return attrs
+
 
 class HistorialEstadoSerializer(serializers.ModelSerializer):
     estado_anterior_display = serializers.CharField(source='get_estado_anterior_display', read_only=True)

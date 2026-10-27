@@ -138,9 +138,17 @@ class OpcionPersonalizacion(models.Model):
     """
     Extra que el cliente puede agregar (más porciones) o quitar (menos porciones).
     Ejemplo: "Frutillas" = 0,100 kg de frutilla por porción, $1.500 por porción.
+    Cada opción se ofrece solo en los productos indicados.
     """
 
     nombre = models.CharField('nombre', max_length=100, unique=True)
+    productos = models.ManyToManyField(
+        Producto,
+        related_name='opciones',
+        blank=True,
+        verbose_name='productos donde se ofrece',
+        help_text='La opción solo aparece en el cotizador para estos productos.',
+    )
     insumo = models.ForeignKey(
         Insumo,
         on_delete=models.PROTECT,

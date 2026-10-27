@@ -44,7 +44,7 @@ class ProductoViewSet(ProtegidoContraBorradoMixin, viewsets.ModelViewSet):
 
     serializer_class = ProductoSerializer
     permission_classes = [PermisosDelModelo]
-    queryset = Producto.objects.prefetch_related('receta__insumo')
+    queryset = Producto.objects.prefetch_related('receta__insumo', 'opciones')
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -58,7 +58,7 @@ class OpcionPersonalizacionViewSet(ProtegidoContraBorradoMixin, viewsets.ModelVi
 
     serializer_class = OpcionPersonalizacionSerializer
     permission_classes = [PermisosDelModelo]
-    queryset = OpcionPersonalizacion.objects.select_related('insumo')
+    queryset = OpcionPersonalizacion.objects.select_related('insumo').prefetch_related('productos')
 
     def get_queryset(self):
         queryset = super().get_queryset()

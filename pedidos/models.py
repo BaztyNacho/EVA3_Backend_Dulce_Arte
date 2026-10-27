@@ -242,6 +242,12 @@ class PersonalizacionDetalle(models.Model):
     def clean(self):
         if self.porciones == 0:
             raise ValidationError({'porciones': 'Las porciones no pueden ser 0.'})
+        # Regla de negocio: cada producto solo acepta sus propios extras.
+        if self.opcion_id and self.detalle_id:
+            if not self.opcion.productos.filter(pk=self.detalle.producto_id).exists():
+                raise ValidationError({
+                    'opcion': f'"{self.opcion.nombre}" no está disponible para {self.detalle.producto.nombre}.'
+                })
 
     @property
     def precio_adicional(self):

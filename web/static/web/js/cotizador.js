@@ -106,10 +106,16 @@ function dibujarLineas(hayNueva = false) {
     );
     caja.append(cabecera);
 
-    if (OPCIONES.length) {
+    // Solo los extras que se ofrecen para este producto
+    const opcionesProducto = OPCIONES.filter((o) => linea.producto.opciones.includes(o.id));
+    if (opcionesProducto.length) {
       const lista = document.createElement('div');
       lista.className = 'personalizaciones';
-      for (const opcion of OPCIONES) {
+      const titulo = document.createElement('span');
+      titulo.className = 'etiqueta';
+      titulo.textContent = 'Extras';
+      lista.append(titulo);
+      for (const opcion of opcionesProducto) {
         const porciones = linea.extras[opcion.id] || 0;
         const fila = document.createElement('div');
         fila.className = 'personalizacion';

@@ -43,6 +43,7 @@ class RecetaItemSerializer(serializers.ModelSerializer):
 class ProductoSerializer(serializers.ModelSerializer):
     categoria_display = serializers.CharField(source='get_categoria_display', read_only=True)
     receta = RecetaItemSerializer(many=True, read_only=True)
+    opciones = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Producto
@@ -56,6 +57,7 @@ class ProductoSerializer(serializers.ModelSerializer):
             'imagen',
             'activo',
             'receta',
+            'opciones',
         ]
 
 
@@ -71,6 +73,7 @@ class OpcionPersonalizacionSerializer(serializers.ModelSerializer):
             'insumo_nombre',
             'cantidad_por_porcion',
             'precio_por_porcion',
+            'productos',
             'activo',
         ]
 
