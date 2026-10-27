@@ -8,9 +8,9 @@ from django.utils import timezone
 from django.utils.html import format_html
 
 from inventario.admin import etiqueta
-from pedidos.models import HistorialEstado, Pedido
 
 from .models import Despacho, Ruta
+from .services import marcar_pedido_entregado
 
 COLORES_DESPACHO = {
     Despacho.Estado.PENDIENTE: ('#F1EFE8', '#444441'),
@@ -122,20 +122,9 @@ class DespachoAdmin(admin.ModelAdmin):
         return 'Sin comprobante'
 
     def save_model(self, request, obj, form, change):
-        estado_anterior_pedido = obj.pedido.estado
         if obj.estado == Despacho.Estado.ENTREGADO and not obj.fecha_entrega_real:
             obj.fecha_entrega_real = timezone.now()
         super().save_model(request, obj, form, change)
-
         # Al entregar el despacho, el pedido también pasa a "Entregado" (con trazabilidad).
-        if obj.estado == Despacho.Estado.ENTREGADO and estado_anterior_pedido != Pedido.Estado.ENTREGADO:
-            pedido = obj.pedido
-            pedido.estado = Pedido.Estado.ENTREGADO
-            pedido.save(update_fields=['estado', 'actualizado_en'])
-            HistorialEstado.objects.create(
-                pedido=pedido,
-                estado_anterior=estado_anterior_pedido,
-                estado_nuevo=Pedido.Estado.ENTREGADO,
-                usuario=request.user,
-                comentario=f'Entregado a {obj.nombre_receptor}',
-            )
+        if obj.estado == Despacho.Estado.ENTREGADO:
+            marcar_pedido_entregado(obj, request.user)

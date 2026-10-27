@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Librerías externas
     'rest_framework',
+    'drf_spectacular',
     # Apps del proyecto Dulce Arte
     'inventario',
     'pedidos',
@@ -130,6 +131,37 @@ STATIC_URL = 'static/'
 # ---------------------------------------------------------------
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ---------------------------------------------------------------
+# Django REST Framework (API)
+# ---------------------------------------------------------------
+REST_FRAMEWORK = {
+    # La interfaz web usa la misma sesión de Django (login con usuario y contraseña).
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    # Por defecto, toda la API exige haber iniciado sesión.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Dulce Arte',
+    'DESCRIPTION': 'Sistema de Trazabilidad y Pedidos para Pastelería Artesanal.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # La documentación solo es visible con sesión iniciada.
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAuthenticated'],
+    # Nombres claros para los distintos "estado" en la documentación.
+    'ENUM_NAME_OVERRIDES': {
+        'EstadoPedidoEnum': 'pedidos.models.Pedido.Estado',
+        'EstadoDespachoEnum': 'despachos.models.Despacho.Estado',
+        'EstadoRutaEnum': 'despachos.models.Ruta.Estado',
+    },
+}
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

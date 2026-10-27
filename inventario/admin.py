@@ -4,11 +4,11 @@ Configuración del Django Admin para la app INVENTARIO.
 
 from django import forms
 from django.contrib import admin, messages
-from django.db import transaction
 from django.db.models import Count, F
 from django.utils.html import format_html
 
 from .models import Insumo, MovimientoInsumo, OpcionPersonalizacion, Producto, RecetaItem
+from .services import registrar_movimiento
 
 
 def formato_clp(valor):
@@ -224,15 +224,14 @@ class MovimientoInsumoAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if change:
             return
-        suma = obj.tipo in (MovimientoInsumo.Tipo.ENTRADA, MovimientoInsumo.Tipo.DEVOLUCION)
-        with transaction.atomic():
-            insumo = Insumo.objects.select_for_update().get(pk=obj.insumo_id)
-            if suma:
-                insumo.stock_actual += obj.cantidad
-            else:
-                insumo.stock_actual -= obj.cantidad
-            insumo.save(update_fields=['stock_actual', 'actualizado_en'])
-            obj.usuario = request.user
-            super().save_model(request, obj, form, change)
-        if insumo.stock_bajo:
-            messages.warning(request, f'Atención: {insumo.nombre} quedó con stock bajo.')
+        # La lógica de stock vive en inventario/services.py (la misma que usa la API).
+        movimiento = registrar_movimiento(
+            insumo=obj.insumo,
+            tipo=obj.tipo,
+            cantidad=obj.cantidad,
+            usuario=request.user,
+            motivo=obj.motivo,
+        )
+        obj.pk = movimiento.pk
+        if movimiento.insumo.stock_bajo:
+            messages.warning(request, f'Atención: {movimiento.insumo.nombre} quedó con stock bajo.')
