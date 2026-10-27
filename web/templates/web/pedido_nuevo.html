@@ -1,0 +1,119 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Nueva cotización{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Nueva cotización</h1>
+    <p>Registra lo que pide el cliente. El pedido se envía a cocina cuando confirmes la cotización.</p>
+  </div>
+</div>
+
+<form id="cotizador" class="grilla-2" novalidate>
+  <div>
+    <section class="panel" aria-labelledby="t-cliente" style="margin-bottom:1.5rem">
+      <h2 id="t-cliente">Cliente</h2>
+
+      <div id="cliente-elegido" class="cliente-elegido" hidden>
+        <span id="cliente-elegido-texto"></span>
+        <button type="button" class="quitar" id="cambiar-cliente">Cambiar</button>
+      </div>
+
+      <div id="buscar-cliente">
+        <div class="campo">
+          <label for="busqueda-cliente">Buscar cliente existente</label>
+          <input type="search" id="busqueda-cliente" placeholder="Nombre o teléfono" autocomplete="off">
+          <ul id="sugerencias" class="sugerencias" hidden></ul>
+        </div>
+        <details id="nuevo-cliente">
+          <summary>Es un cliente nuevo</summary>
+          <div class="fila" style="margin-top:1rem">
+            <div class="campo"><label for="c-nombre">Nombre completo</label><input type="text" id="c-nombre"></div>
+            <div class="campo"><label for="c-telefono">Teléfono</label><input type="tel" id="c-telefono" placeholder="+56 9 1234 5678"></div>
+          </div>
+          <div class="fila">
+            <div class="campo"><label for="c-email">Correo (opcional)</label><input type="email" id="c-email"></div>
+            <div class="campo"><label for="c-direccion">Dirección (opcional)</label><input type="text" id="c-direccion"></div>
+          </div>
+        </details>
+      </div>
+      <p class="error-campo" data-error="cliente"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="t-entrega" style="margin-bottom:1.5rem">
+      <h2 id="t-entrega">Entrega</h2>
+      <div class="fila">
+        <div class="campo">
+          <label for="fecha-entrega">Fecha y hora</label>
+          <input type="datetime-local" id="fecha-entrega" min="{{ fecha_minima }}" required>
+          <small>Con al menos 24 horas de anticipación.</small>
+          <span class="error-campo" data-error="fecha_entrega"></span>
+        </div>
+        <div class="campo">
+          <span class="etiqueta">Tipo de entrega</span>
+          <div class="opciones-radio">
+            <label><input type="radio" name="tipo_entrega" value="retiro" checked><span>Retiro en tienda</span></label>
+            <label><input type="radio" name="tipo_entrega" value="despacho"><span>Despacho a domicilio</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="campo" id="campo-direccion" hidden>
+        <label for="direccion-entrega">Dirección de entrega</label>
+        <input type="text" id="direccion-entrega">
+        <span class="error-campo" data-error="direccion_entrega"></span>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="t-productos" style="margin-bottom:1.5rem">
+      <h2 id="t-productos">Productos</h2>
+      <p class="nota">Toca un producto para agregarlo. Luego ajusta la cantidad y los extras.</p>
+      <div id="catalogo" class="catalogo"></div>
+      <div id="lineas" style="margin-top:1.25rem"></div>
+      <p class="error-campo" data-error="detalles"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="t-diseno">
+      <h2 id="t-diseno">Diseño</h2>
+      <div class="campo">
+        <label for="diseno">Descripción del diseño</label>
+        <textarea id="diseno" placeholder="Colores, decoración, mensaje sobre la torta…"></textarea>
+      </div>
+      <div class="campo">
+        <label for="imagen">Imagen de referencia (opcional)</label>
+        <input type="file" id="imagen" accept="image/*">
+      </div>
+      <div class="campo">
+        <label for="observaciones">Observaciones internas (opcional)</label>
+        <textarea id="observaciones"></textarea>
+      </div>
+    </section>
+  </div>
+
+  <aside class="resumen" aria-labelledby="t-resumen">
+    <div class="comanda">
+      <h2 id="t-resumen" style="font-size:var(--t-l)">Resumen</h2>
+      <ul class="comanda__lineas" id="resumen-lineas">
+        <li><span class="nota">Aún no agregas productos.</span></li>
+      </ul>
+      <div class="comanda__pie">
+        <span>Total estimado</span>
+        <span class="resumen__total" id="resumen-total">$0</span>
+      </div>
+      <p class="nota" style="margin-top:0.75rem">El sistema recalcula el total al guardar.</p>
+      <button class="boton boton--grande" type="submit" id="guardar">Guardar cotización</button>
+    </div>
+  </aside>
+</form>
+
+{{ productos_json|json_script:"datos-productos" }}
+{{ opciones_json|json_script:"datos-opciones" }}
+{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script>
+  const URL_DETALLE = "{% url 'pedido_detalle' 0 %}";
+</script>
+<script src="{% static 'web/js/cotizador.js' %}"></script>
+{% endblock %}

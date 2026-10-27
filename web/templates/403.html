@@ -1,0 +1,11 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Sin acceso{% endblock %}
+
+{% block contenido %}
+<div class="panel vacio">
+  <h1>No tienes acceso a esta sección</h1>
+  <p>Tu usuario no tiene el rol necesario. Si crees que es un error, pide al Administrador que revise tus permisos.</p>
+  <a class="boton" href="{% url 'inicio' %}">Ir al inicio</a>
+</div>
+{% endblock %}

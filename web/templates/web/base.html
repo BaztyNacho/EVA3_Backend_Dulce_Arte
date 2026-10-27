@@ -1,0 +1,55 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Dulce Arte{% endblock %} · Dulce Arte</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,500..700,100,1&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'web/css/dulce.css' %}">
+  {% block estilos %}{% endblock %}
+</head>
+<body>
+  {% block cuerpo %}
+  <header class="barra">
+    <div class="barra__contenido">
+      <a class="marca" href="{% url 'inicio' %}">Dulce Arte</a>
+      <nav class="nav" aria-label="Principal">
+        {% with ruta=request.resolver_match.url_name %}
+        <a href="{% url 'inicio' %}" {% if ruta == 'inicio' %}aria-current="page"{% endif %}>Inicio</a>
+        <a href="{% url 'pedidos_lista' %}" {% if ruta == 'pedidos_lista' or ruta == 'pedido_detalle' %}aria-current="page"{% endif %}>Pedidos</a>
+        <a href="{% url 'pedido_nuevo' %}" {% if ruta == 'pedido_nuevo' %}aria-current="page"{% endif %}>Nueva cotización</a>
+        {% if es_admin %}
+          {% block nav_admin %}{% endblock %}
+          <a href="{% url 'admin:index' %}">Administración</a>
+        {% endif %}
+        {% endwith %}
+      </nav>
+      <div class="usuario">
+        <span>{{ user.get_full_name|default:user.username }}<br><small>{% if es_admin %}Administrador{% elif es_ventas %}Atención y Ventas{% endif %}</small></span>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit">Cerrar sesión</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <main class="pagina" id="contenido">
+    {% if messages %}
+      <ul class="mensajes">
+        {% for mensaje in messages %}
+          <li class="mensaje mensaje--{{ mensaje.tags|default:'info' }}">{{ mensaje }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <div id="avisos" class="mensajes" aria-live="polite"></div>
+    {% block contenido %}{% endblock %}
+  </main>
+  {% endblock %}
+
+  <script src="{% static 'web/js/api.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

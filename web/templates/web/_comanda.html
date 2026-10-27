@@ -1,0 +1,21 @@
+{% load dulce %}
+{# Comanda: ticket de pedido reutilizable. Recibe "pedido" y "limite_urgente". #}
+<a class="comanda{% if pedido.fecha_entrega <= limite_urgente and pedido.estado != 'entregado' and pedido.estado != 'cancelado' %} comanda--urgente{% endif %}"
+   href="{% url 'pedido_detalle' pedido.pk %}">
+  <div class="comanda__cabecera">
+    <span class="comanda__numero">Pedido #{{ pedido.pk }}</span>
+    <span class="estado estado--{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+  </div>
+  <div class="comanda__hora">{{ pedido.fecha_entrega|date:"H:i" }}</div>
+  <div class="comanda__fecha">{{ pedido.fecha_entrega|date:"l j \d\e F" }}, {{ pedido.get_tipo_entrega_display|lower }}</div>
+  <div class="comanda__cliente">{{ pedido.cliente.nombre }}</div>
+  <ul class="comanda__lineas">
+    {% for detalle in pedido.detalles.all %}
+      <li>{{ detalle.cantidad }} × {{ detalle.producto.nombre }}</li>
+    {% endfor %}
+  </ul>
+  <div class="comanda__pie">
+    <span class="nota">{{ pedido.cliente.telefono }}</span>
+    <span class="comanda__total">{{ pedido.total|clp }}</span>
+  </div>
+</a>

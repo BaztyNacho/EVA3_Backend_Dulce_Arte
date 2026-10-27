@@ -1,0 +1,55 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Pedidos{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Pedidos</h1>
+    <p>{{ pagina.paginator.count }} pedido{{ pagina.paginator.count|pluralize }} en esta vista.</p>
+  </div>
+  <a class="boton" href="{% url 'pedido_nuevo' %}">Crear cotización</a>
+</div>
+
+<form class="filtros" method="get" role="search">
+  <input type="hidden" name="estado" value="{{ filtro_actual }}">
+  <label class="oculto-visual" for="buscar">Buscar pedido</label>
+  <input type="search" id="buscar" name="q" value="{{ texto }}" placeholder="Cliente, teléfono o n° de pedido">
+  <button class="boton boton--secundario" type="submit">Buscar</button>
+</form>
+
+<nav class="chips" aria-label="Filtrar por estado" style="margin-bottom:1.75rem">
+  {% for valor, nombre in filtros %}
+    <a class="chip" href="?estado={{ valor }}{% if texto %}&q={{ texto|urlencode }}{% endif %}"
+       {% if valor == filtro_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>
+  {% endfor %}
+</nav>
+
+{% if pagina.object_list %}
+  <div class="comandas">
+    {% for pedido in pagina.object_list %}
+      {% include 'web/_comanda.html' %}
+    {% endfor %}
+  </div>
+  {% if pagina.paginator.num_pages > 1 %}
+    <nav class="paginacion" aria-label="Páginas">
+      {% if pagina.has_previous %}
+        <a class="boton boton--secundario" href="?estado={{ filtro_actual }}&q={{ texto|urlencode }}&pagina={{ pagina.previous_page_number }}">Anterior</a>
+      {% endif %}
+      <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+      {% if pagina.has_next %}
+        <a class="boton boton--secundario" href="?estado={{ filtro_actual }}&q={{ texto|urlencode }}&pagina={{ pagina.next_page_number }}">Siguiente</a>
+      {% endif %}
+    </nav>
+  {% endif %}
+{% else %}
+  <div class="panel vacio">
+    {% if texto %}
+      <p>No encontramos pedidos para "{{ texto }}". Prueba con otro nombre, teléfono o número.</p>
+    {% else %}
+      <p>No hay pedidos en esta vista todavía.</p>
+    {% endif %}
+    <a class="boton" href="{% url 'pedido_nuevo' %}">Crear cotización</a>
+  </div>
+{% endif %}
+{% endblock %}

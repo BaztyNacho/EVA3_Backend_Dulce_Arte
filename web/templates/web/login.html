@@ -1,0 +1,33 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Ingresar{% endblock %}
+
+{% block cuerpo %}
+<main class="acceso">
+  <form class="comanda" method="post" novalidate>
+    {% csrf_token %}
+    <h1>Dulce Arte</h1>
+    <p>Ingresa con tu usuario para gestionar pedidos, cocina y despachos.</p>
+
+    {% if form.non_field_errors %}
+      <div class="mensaje mensaje--error" role="alert">
+        Usuario o contraseña incorrectos. Revisa los datos e inténtalo de nuevo.
+      </div>
+    {% endif %}
+
+    <div class="campo">
+      <label for="id_username">Usuario</label>
+      <input type="text" name="username" id="id_username" autocomplete="username" required autofocus
+             value="{{ form.username.value|default:'' }}">
+    </div>
+    <div class="campo">
+      <label for="id_password">Contraseña</label>
+      <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="boton boton--grande" type="submit">Ingresar</button>
+  </form>
+</main>
+{% endblock %}
+
+{% block scripts %}{% endblock %}

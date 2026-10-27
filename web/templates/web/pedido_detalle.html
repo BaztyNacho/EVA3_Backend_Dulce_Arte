@@ -1,0 +1,127 @@
+{% extends 'web/base.html' %}
+{% load dulce static %}
+
+{% block titulo %}Pedido #{{ pedido.pk }}{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Pedido #{{ pedido.pk }}</h1>
+    <p>Registrado el {{ pedido.creado_en|date:"j \d\e F, H:i" }}{% if pedido.creado_por %} por {{ pedido.creado_por.username }}{% endif %}.</p>
+  </div>
+  <a class="boton boton--secundario" href="{% url 'pedidos_lista' %}">Volver a pedidos</a>
+</div>
+
+<div class="grilla-2">
+  <div>
+    <article class="comanda" style="margin-bottom:1.5rem">
+      <div class="comanda__cabecera">
+        <span class="comanda__numero">Entrega</span>
+        <span class="estado estado--{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+      </div>
+      <div class="comanda__hora" style="font-size:var(--t-xxl)">{{ pedido.fecha_entrega|date:"H:i" }}</div>
+      <div class="comanda__fecha">{{ pedido.fecha_entrega|date:"l j \d\e F \d\e Y" }}</div>
+      <div class="comanda__fecha">
+        {{ pedido.get_tipo_entrega_display }}{% if pedido.direccion_entrega %}: {{ pedido.direccion_entrega }}{% endif %}
+      </div>
+
+      <div class="comanda__cliente">{{ pedido.cliente.nombre }}</div>
+      <div class="nota">{{ pedido.cliente.telefono }}{% if pedido.cliente.email %}, {{ pedido.cliente.email }}{% endif %}</div>
+
+      <ul class="comanda__lineas">
+        {% for detalle in pedido.detalles.all %}
+          <li>
+            <div style="display:flex;justify-content:space-between;gap:1rem">
+              <strong>{{ detalle.cantidad }} × {{ detalle.producto.nombre }}</strong>
+              <span>{{ detalle.subtotal|clp }}</span>
+            </div>
+            {% for perso in detalle.personalizaciones.all %}
+              <div class="nota">
+                {% if perso.porciones > 0 %}Más {{ perso.opcion.nombre|lower }} (+{{ perso.porciones }}){% else %}Menos {{ perso.opcion.nombre|lower }} ({{ perso.porciones }}){% endif %}
+              </div>
+            {% endfor %}
+            {% if detalle.comentario %}<div class="nota">Comentario: {{ detalle.comentario }}</div>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      <div class="comanda__pie">
+        <span>Total</span>
+        <span class="resumen__total">{{ pedido.total|clp }}</span>
+      </div>
+    </article>
+
+    <section class="panel" aria-labelledby="t-diseno" style="margin-bottom:1.5rem">
+      <h2 id="t-diseno">Diseño</h2>
+      {% if pedido.diseno %}<p>{{ pedido.diseno|linebreaksbr }}</p>{% else %}<p class="nota">Sin descripción de diseño.</p>{% endif %}
+      {% if pedido.imagen_referencia %}
+        <img class="imagen-referencia" src="{{ pedido.imagen_referencia.url }}" alt="Imagen de referencia del diseño del pedido {{ pedido.pk }}">
+      {% endif %}
+      {% if es_cotizacion %}
+        <form id="form-imagen" style="margin-top:1rem">
+          <div class="campo">
+            <label for="imagen">{% if pedido.imagen_referencia %}Reemplazar imagen de referencia{% else %}Subir imagen de referencia{% endif %}</label>
+            <input type="file" id="imagen" accept="image/*" required>
+          </div>
+          <button class="boton boton--secundario" type="submit">Subir imagen</button>
+        </form>
+      {% endif %}
+      {% if pedido.observaciones %}
+        <h3 style="margin-top:1.25rem">Observaciones internas</h3>
+        <p>{{ pedido.observaciones|linebreaksbr }}</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside>
+    {% if es_cotizacion %}
+      <section class="panel" aria-labelledby="t-confirmar" style="margin-bottom:1.5rem">
+        <h2 id="t-confirmar">Confirmar cotización</h2>
+        <p class="nota">Al confirmar, se descuentan los insumos de bodega y el pedido pasa a cocina. Después no se pueden cambiar los productos.</p>
+        <ul class="disponibilidad" id="disponibilidad"><li class="nota">Revisando stock…</li></ul>
+        <button class="boton boton--grande" id="confirmar" style="margin-top:1.25rem" disabled>Confirmar y enviar a cocina</button>
+      </section>
+    {% endif %}
+
+    {% if puede_cancelar %}
+      <details class="panel" style="margin-bottom:1.5rem">
+        <summary><strong>Cancelar pedido</strong></summary>
+        <form id="form-cancelar" style="margin-top:1rem">
+          <p class="nota">
+            {% if pedido.estado == 'recibido' %}Como aún no se empieza a preparar, los insumos vuelven a bodega.
+            {% elif pedido.estado == 'cotizacion' %}La cotización quedará cancelada.
+            {% else %}El pedido ya está en preparación: los insumos se consideran consumidos.{% endif %}
+          </p>
+          <div class="campo">
+            <label for="motivo">Motivo</label>
+            <input type="text" id="motivo" maxlength="200" placeholder="Ej.: el cliente desistió">
+          </div>
+          <button class="boton boton--peligro" type="submit">Cancelar pedido</button>
+        </form>
+      </details>
+    {% endif %}
+
+    <section class="panel" aria-labelledby="t-historial">
+      <h2 id="t-historial">Historial</h2>
+      <ol class="linea-tiempo">
+        {% for cambio in pedido.historial.all %}
+          <li>
+            <strong>{{ cambio.get_estado_nuevo_display }}</strong>
+            {% if cambio.comentario %}<div>{{ cambio.comentario }}</div>{% endif %}
+            <time datetime="{{ cambio.fecha|date:'c' }}">{{ cambio.fecha|date:"j M, H:i" }}{% if cambio.usuario %}, {{ cambio.usuario.username }}{% endif %}</time>
+          </li>
+        {% empty %}
+          <li class="nota">Sin cambios registrados.</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const PEDIDO_ID = {{ pedido.pk }};
+  const ES_COTIZACION = {{ es_cotizacion|yesno:"true,false" }};
+</script>
+<script src="{% static 'web/js/pedido_detalle.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Hola, {{ user.first_name|default:user.username }}</h1>
+    <p>{% now "l j \d\e F" %}. Esto es lo que está pasando en la pastelería.</p>
+  </div>
+  <a class="boton" href="{% url 'pedido_nuevo' %}">Crear cotización</a>
+</div>
+
+<section class="resumen-dia" aria-label="Resumen del día">
+  <a class="cifra" href="{% url 'pedidos_lista' %}?estado=cotizacion">
+    <strong>{{ cotizaciones }}</strong><span>cotizaciones por confirmar</span>
+  </a>
+  <a class="cifra" href="{% url 'pedidos_lista' %}?estado=cocina">
+    <strong>{{ en_cocina }}</strong><span>pedidos en cocina</span>
+  </a>
+  <a class="cifra" href="{% url 'pedidos_lista' %}?estado=listo">
+    <strong>{{ listos }}</strong><span>listos para entregar</span>
+  </a>
+  <div class="cifra">
+    <strong>{{ entregas_hoy }}</strong><span>entregas programadas hoy</span>
+  </div>
+  {% if es_admin %}
+    <a class="cifra{% if insumos_bajos %} cifra--alerta{% endif %}" href="{% url 'admin:inventario_insumo_changelist' %}?stock=bajo">
+      <strong>{{ insumos_bajos|length }}</strong><span>insumos con stock bajo</span>
+    </a>
+  {% endif %}
+</section>
+
+{% if es_admin and insumos_bajos %}
+  <div class="mensaje mensaje--warning" role="status" style="margin-bottom:2rem">
+    Reponer pronto:
+    {% for insumo in insumos_bajos %}{{ insumo.nombre }} (quedan {{ insumo.stock_actual|floatformat:"-3" }} {{ insumo.unidad }}){% if not forloop.last %}, {% endif %}{% endfor %}.
+  </div>
+{% endif %}
+
+<h2>Próximas entregas</h2>
+{% if entregas_proximas %}
+  <div class="comandas">
+    {% for pedido in entregas_proximas %}
+      {% include 'web/_comanda.html' %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="panel vacio">
+    <p>No hay entregas para hoy ni mañana. Las cotizaciones confirmadas aparecerán aquí.</p>
+    <a class="boton boton--secundario" href="{% url 'pedidos_lista' %}">Ver todos los pedidos</a>
+  </div>
+{% endif %}
+{% endblock %}

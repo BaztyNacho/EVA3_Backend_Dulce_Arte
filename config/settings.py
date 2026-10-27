@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'inventario',
     'pedidos',
     'despachos',
+    'web',
 ]
 
 MIDDLEWARE = [
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'web.context_processors.roles',
             ],
         },
     },
@@ -131,6 +133,14 @@ STATIC_URL = 'static/'
 # ---------------------------------------------------------------
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ---------------------------------------------------------------
+# Inicio y cierre de sesión de la interfaz web
+# ---------------------------------------------------------------
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'inicio'
+LOGOUT_REDIRECT_URL = 'login'
 
 
 # ---------------------------------------------------------------

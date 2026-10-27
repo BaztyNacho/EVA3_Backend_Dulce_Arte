@@ -21,6 +21,8 @@ urlpatterns = [
     # Documentación de la API (Swagger)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # Interfaz web (login, inicio, pedidos, cotizador...)
+    path('', include('web.urls')),
 ]
 
 # En desarrollo, Django sirve las imágenes subidas (firmas, comprobantes, productos).
