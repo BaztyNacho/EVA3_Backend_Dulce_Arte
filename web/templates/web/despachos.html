@@ -13,7 +13,7 @@
 
 <div class="grilla-2">
   <div>
-    <section aria-labelledby="t-sin-ruta" style="margin-bottom:2rem">
+    <section class="espacio-abajo-grande" aria-labelledby="t-sin-ruta">
       <h2 id="t-sin-ruta">Por asignar ({{ sin_ruta|length }})</h2>
       {% if sin_ruta %}
         <div class="paradas">
@@ -43,7 +43,7 @@
     </section>
 
     {% for ruta in rutas %}
-      <section class="panel ruta" aria-labelledby="ruta-{{ ruta.pk }}" style="margin-bottom:1.5rem">
+      <section class="panel ruta espacio-abajo" aria-labelledby="ruta-{{ ruta.pk }}">
         <header class="ruta__cabecera">
           <div>
             <h2 id="ruta-{{ ruta.pk }}">{{ ruta.nombre }}</h2>
@@ -83,7 +83,7 @@
   </div>
 
   <aside>
-    <form class="panel" id="form-ruta" style="margin-bottom:1.5rem" novalidate>
+    <form class="panel espacio-abajo" id="form-ruta" novalidate>
       <h2>Nueva ruta</h2>
       <div class="campo">
         <label for="r-nombre">Nombre</label>
@@ -93,7 +93,7 @@
         <label for="r-fecha">Fecha de reparto</label>
         <input type="date" id="r-fecha" value="{{ hoy|date:'Y-m-d' }}" required>
       </div>
-      <button class="boton" type="submit" style="width:100%">Crear ruta</button>
+      <button class="boton ancho-completo" type="submit">Crear ruta</button>
     </form>
 
     <section class="panel" aria-labelledby="t-entregados">

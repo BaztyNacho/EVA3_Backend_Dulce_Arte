@@ -14,12 +14,12 @@
 
 <div class="grilla-2">
   <div>
-    <article class="comanda" style="margin-bottom:1.5rem">
+    <article class="comanda espacio-abajo">
       <div class="comanda__cabecera">
         <span class="comanda__numero">Entrega</span>
         <span class="estado estado--{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
       </div>
-      <div class="comanda__hora" style="font-size:var(--t-xxl)">{{ pedido.fecha_entrega|date:"H:i" }}</div>
+      <div class="comanda__hora comanda__hora--grande">{{ pedido.fecha_entrega|date:"H:i" }}</div>
       <div class="comanda__fecha">{{ pedido.fecha_entrega|date:"l j \d\e F \d\e Y" }}</div>
       <div class="comanda__fecha">
         {{ pedido.get_tipo_entrega_display }}{% if pedido.direccion_entrega %}: {{ pedido.direccion_entrega }}{% endif %}
@@ -31,7 +31,7 @@
       <ul class="comanda__lineas">
         {% for detalle in pedido.detalles.all %}
           <li>
-            <div style="display:flex;justify-content:space-between;gap:1rem">
+            <div class="fila-extremos">
               <strong>{{ detalle.cantidad }} × {{ detalle.producto.nombre }}</strong>
               <span>{{ detalle.subtotal|clp }}</span>
             </div>
@@ -50,14 +50,14 @@
       </div>
     </article>
 
-    <section class="panel" aria-labelledby="t-diseno" style="margin-bottom:1.5rem">
+    <section class="panel espacio-abajo" aria-labelledby="t-diseno">
       <h2 id="t-diseno">Diseño</h2>
       {% if pedido.diseno %}<p>{{ pedido.diseno|linebreaksbr }}</p>{% else %}<p class="nota">Sin descripción de diseño.</p>{% endif %}
       {% if pedido.imagen_referencia %}
         <img class="imagen-referencia" src="{{ pedido.imagen_referencia.url }}" alt="Imagen de referencia del diseño del pedido {{ pedido.pk }}">
       {% endif %}
       {% if es_cotizacion %}
-        <form id="form-imagen" style="margin-top:1rem">
+        <form id="form-imagen" class="espacio-arriba">
           <div class="campo">
             <label for="imagen">{% if pedido.imagen_referencia %}Reemplazar imagen de referencia{% else %}Subir imagen de referencia{% endif %}</label>
             <input type="file" id="imagen" accept="image/*" required>
@@ -66,7 +66,7 @@
         </form>
       {% endif %}
       {% if pedido.observaciones %}
-        <h3 style="margin-top:1.25rem">Observaciones internas</h3>
+        <h3 class="espacio-arriba-medio">Observaciones internas</h3>
         <p>{{ pedido.observaciones|linebreaksbr }}</p>
       {% endif %}
     </section>
@@ -74,18 +74,18 @@
 
   <aside>
     {% if es_cotizacion %}
-      <section class="panel" aria-labelledby="t-confirmar" style="margin-bottom:1.5rem">
+      <section class="panel espacio-abajo" aria-labelledby="t-confirmar">
         <h2 id="t-confirmar">Confirmar cotización</h2>
         <p class="nota">Al confirmar, se descuentan los insumos de bodega y el pedido pasa a cocina. Después no se pueden cambiar los productos.</p>
         <ul class="disponibilidad" id="disponibilidad"><li class="nota">Revisando stock…</li></ul>
-        <button class="boton boton--grande" id="confirmar" style="margin-top:1.25rem" disabled>Confirmar y enviar a cocina</button>
+        <button class="boton boton--grande espacio-arriba" id="confirmar" disabled>Confirmar y enviar a cocina</button>
       </section>
     {% endif %}
 
     {% if puede_cancelar %}
-      <details class="panel" style="margin-bottom:1.5rem">
+      <details class="panel espacio-abajo">
         <summary><strong>Cancelar pedido</strong></summary>
-        <form id="form-cancelar" style="margin-top:1rem">
+        <form id="form-cancelar" class="espacio-arriba">
           <p class="nota">
             {% if pedido.estado == 'recibido' %}Como aún no se empieza a preparar, los insumos vuelven a bodega.
             {% elif pedido.estado == 'cotizacion' %}La cotización quedará cancelada.

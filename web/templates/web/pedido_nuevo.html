@@ -12,7 +12,7 @@
 
 <form id="cotizador" class="grilla-2" novalidate>
   <div>
-    <section class="panel" aria-labelledby="t-cliente" style="margin-bottom:1.5rem">
+    <section class="panel espacio-abajo" aria-labelledby="t-cliente">
       <h2 id="t-cliente">Cliente</h2>
 
       <div id="cliente-elegido" class="cliente-elegido" hidden>
@@ -28,7 +28,7 @@
         </div>
         <details id="nuevo-cliente">
           <summary>Es un cliente nuevo</summary>
-          <div class="fila" style="margin-top:1rem">
+          <div class="fila espacio-arriba">
             <div class="campo"><label for="c-nombre">Nombre completo</label><input type="text" id="c-nombre"></div>
             <div class="campo"><label for="c-telefono">Teléfono</label><input type="tel" id="c-telefono" placeholder="+56 9 1234 5678"></div>
           </div>
@@ -41,7 +41,7 @@
       <p class="error-campo" data-error="cliente"></p>
     </section>
 
-    <section class="panel" aria-labelledby="t-entrega" style="margin-bottom:1.5rem">
+    <section class="panel espacio-abajo" aria-labelledby="t-entrega">
       <h2 id="t-entrega">Entrega</h2>
       <div class="fila">
         <div class="campo">
@@ -65,11 +65,11 @@
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="t-productos" style="margin-bottom:1.5rem">
+    <section class="panel espacio-abajo" aria-labelledby="t-productos">
       <h2 id="t-productos">Productos</h2>
       <p class="nota">Toca un producto para agregarlo. Luego ajusta la cantidad y los extras.</p>
       <div id="catalogo" class="catalogo"></div>
-      <div id="lineas" style="margin-top:1.25rem"></div>
+      <div id="lineas" class="espacio-arriba"></div>
       <p class="error-campo" data-error="detalles"></p>
     </section>
 
@@ -92,7 +92,7 @@
 
   <aside class="resumen" aria-labelledby="t-resumen">
     <div class="comanda">
-      <h2 id="t-resumen" style="font-size:var(--t-l)">Resumen</h2>
+      <h2 id="t-resumen" class="resumen__titulo">Resumen</h2>
       <ul class="comanda__lineas" id="resumen-lineas">
         <li><span class="nota">Aún no agregas productos.</span></li>
       </ul>
@@ -100,7 +100,7 @@
         <span>Total estimado</span>
         <span class="resumen__total" id="resumen-total">$0</span>
       </div>
-      <p class="nota" style="margin-top:0.75rem">El sistema recalcula el total al guardar.</p>
+      <p class="nota espacio-arriba-chico">El sistema recalcula el total al guardar.</p>
       <button class="boton boton--grande" type="submit" id="guardar">Guardar cotización</button>
     </div>
   </aside>

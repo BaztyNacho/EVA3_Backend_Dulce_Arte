@@ -32,7 +32,7 @@
 </section>
 
 {% if es_admin and insumos_bajos %}
-  <div class="mensaje mensaje--warning" role="status" style="margin-bottom:2rem">
+  <div class="mensaje mensaje--warning espacio-abajo-grande" role="status">
     Reponer pronto:
     {% for insumo in insumos_bajos %}{{ insumo.nombre }} (quedan {{ insumo.stock_actual|floatformat:"-3" }} {{ insumo.unidad }}){% if not forloop.last %}, {% endif %}{% endfor %}.
   </div>

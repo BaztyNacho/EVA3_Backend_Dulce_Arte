@@ -137,7 +137,7 @@ function dibujarLineas(hayNueva = false) {
 
     const campo = document.createElement('div');
     campo.className = 'campo';
-    campo.style.margin = '0.75rem 0 0';
+    campo.classList.add('comentario-linea');
     const idComentario = `comentario-${linea.uid}`;
     campo.innerHTML = `<label for="${idComentario}">Comentario o añadido extra</label>`;
     const comentario = document.createElement('textarea');
@@ -198,7 +198,7 @@ $('#busqueda-cliente').addEventListener('input', (evento) => {
     const { ok, datos } = await llamarApi(`/api/clientes/?q=${encodeURIComponent(texto)}`);
     sugerencias.replaceChildren();
     if (!ok || !datos.length) {
-      sugerencias.innerHTML = '<li style="padding:0.55rem 0.75rem" class="nota">Sin resultados. Regístralo como cliente nuevo.</li>';
+      sugerencias.innerHTML = '<li class="nota sugerencias__vacio">Sin resultados. Regístralo como cliente nuevo.</li>';
     } else {
       for (const cliente of datos.slice(0, 8)) {
         const item = document.createElement('li');

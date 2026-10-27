@@ -11,7 +11,7 @@
   </div>
 </div>
 
-<nav class="chips" aria-label="Filtrar insumos" style="margin-bottom:1.5rem">
+<nav class="chips espacio-abajo" aria-label="Filtrar insumos">
   <a class="chip" href="{% url 'bodega' %}" {% if not solo_bajo %}aria-current="true"{% endif %}>Todos</a>
   <a class="chip" href="{% url 'bodega' %}?stock=bajo" {% if solo_bajo %}aria-current="true"{% endif %}>Stock bajo ({{ total_bajo }})</a>
 </nav>
@@ -49,7 +49,7 @@
   </section>
 
   <aside>
-    <form class="panel" id="form-movimiento" style="margin-bottom:1.5rem" novalidate>
+    <form class="panel espacio-abajo" id="form-movimiento" novalidate>
       <h2>Registrar movimiento</h2>
       <div class="campo">
         <label for="m-insumo">Insumo</label>
@@ -73,7 +73,7 @@
         <label for="m-motivo">Motivo</label>
         <input type="text" id="m-motivo" maxlength="200" placeholder="Ej.: compra a proveedor">
       </div>
-      <button class="boton" type="submit" style="width:100%">Registrar movimiento</button>
+      <button class="boton ancho-completo" type="submit">Registrar movimiento</button>
     </form>
 
     <section class="panel" aria-labelledby="t-movimientos">

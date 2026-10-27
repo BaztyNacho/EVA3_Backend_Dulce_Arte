@@ -18,7 +18,7 @@
   <button class="boton boton--secundario" type="submit">Buscar</button>
 </form>
 
-<nav class="chips" aria-label="Filtrar por estado" style="margin-bottom:1.75rem">
+<nav class="chips espacio-abajo" aria-label="Filtrar por estado">
   {% for valor, nombre in filtros %}
     <a class="chip" href="?estado={{ valor }}{% if texto %}&q={{ texto|urlencode }}{% endif %}"
        {% if valor == filtro_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>

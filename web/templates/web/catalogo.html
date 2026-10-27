@@ -12,7 +12,7 @@
 </div>
 
 {% if categorias|length > 1 %}
-  <nav class="chips" aria-label="Filtrar por categoría" style="margin-bottom:1.75rem">
+  <nav class="chips espacio-abajo" aria-label="Filtrar por categoría">
     <a class="chip" href="{% url 'catalogo' %}" {% if not categoria_actual %}aria-current="true"{% endif %}>Todos</a>
     {% for valor, nombre in categorias %}
       <a class="chip" href="?categoria={{ valor }}" {% if valor == categoria_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>
