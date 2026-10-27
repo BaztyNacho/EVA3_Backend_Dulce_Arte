@@ -1,0 +1,24 @@
+# Servicio de Gunicorn para Dulce Arte.
+# Gunicorn ejecuta Django y se reinicia solo si el servidor se reinicia.
+# Instalar en: /etc/systemd/system/gunicorn.service
+
+[Unit]
+Description=Gunicorn - Dulce Arte (Django)
+After=network.target postgresql.service
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/dulce-arte
+ExecStart=/home/ubuntu/dulce-arte/venv/bin/gunicorn \
+          --workers 3 \
+          --bind unix:/run/gunicorn/dulce_arte.sock \
+          --access-logfile - \
+          config.wsgi:application
+RuntimeDirectory=gunicorn
+# Permite que Nginx (grupo www-data) se conecte al socket de Gunicorn.
+UMask=0007
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

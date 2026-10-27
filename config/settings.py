@@ -24,6 +24,16 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
+# Direcciones desde las que se aceptan formularios (en AWS: http://<IP pública>)
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
+# Protecciones adicionales (siempre activas)
+SESSION_COOKIE_HTTPONLY = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+# La sesión expira tras 8 horas (una jornada de trabajo).
+SESSION_COOKIE_AGE = 60 * 60 * 8
+
 
 # ---------------------------------------------------------------
 # Aplicaciones instaladas
@@ -126,6 +136,8 @@ USE_TZ = True
 # Archivos estáticos (CSS, JavaScript, imágenes del diseño)
 # ---------------------------------------------------------------
 STATIC_URL = 'static/'
+# Carpeta donde `collectstatic` reúne todos los archivos estáticos para Nginx (producción).
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # ---------------------------------------------------------------
@@ -172,6 +184,13 @@ SPECTACULAR_SETTINGS = {
         'EstadoRutaEnum': 'despachos.models.Ruta.Estado',
     },
 }
+
+
+# ---------------------------------------------------------------
+# Tamaño máximo de archivos subidos (fotos de comprobantes desde el celular)
+# ---------------------------------------------------------------
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
