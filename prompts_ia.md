@@ -10,7 +10,8 @@ Este documento registra cómo se usó la IA durante el desarrollo: qué se le pi
 | Herramienta | Uso |
 |---|---|
 | **Claude (chat, Anthropic)** | Herramienta usada en todo el backend, la interfaz inicial y el despliegue: análisis del enunciado, diseño de la arquitectura y del modelo de datos, generación de código paso a paso, depuración de errores y guía de despliegue en AWS. La IA ejecutaba y probaba el código en su propio entorno (incluidas pruebas en navegador con Playwright) antes de entregarlo. |
-| **Claude Code** (instalado en Windows 11) | Instalado al inicio con los complementos Context7, Pro Workflow, Playwright CLI, Impeccable y Emil Kowalski. Hasta la entrega del backend y el despliegue **no se utilizó**: el trabajo se hizo completo desde el chat. Se reservó para la fase de ajustes visuales (ver sección 3.10). |
+| **Claude Code** (instalado en Windows 11) | Instalado al inicio con los complementos Context7, Pro Workflow, Playwright CLI, Impeccable y Emil Kowalski. No se usó en el backend ni en el despliegue. Se probó en la fase visual: hizo una limpieza del CSS y de los templates, que conservé, pero preferí volver al chat para el resto (ver sección 3.10). |
+| **IA generativa de imágenes** | Fotos referenciales de los 11 productos del catálogo (ver sección 3.11). |
 
 **Forma de trabajo acordada con la IA:**
 - Avanzar paso a paso, con explicación de cada cambio para poder defenderlo.
@@ -149,13 +150,25 @@ Este documento registra cómo se usó la IA durante el desarrollo: qué se le pi
   - El tiempo de preparación es solo informativo, no cambia la regla de 24 horas.
   - El catálogo es solo para Ventas, como apoyo para atender al cliente.
   - En la bodega se registran tanto entradas como mermas.
-  - Las fotos de insumos y productos las tomo yo.
+  - Cada producto e insumo tiene su foto; si falta, se muestra el reemplazo.
 
-### 3.10 Uso de Claude Code (pendiente)
+### 3.10 Prueba de Claude Code en la fase visual
 
 **Prompt:** "Dentro de todo lo que hemos realizado, ¿en qué momento utilizamos Claude Code? Inicialmente solicité herramientas y plugins de diseño para que la página se viera profesional, con animaciones y transiciones."
-- **Respuesta de la IA:** reconoció que Claude Code y sus complementos no se habían usado, ya que todo se hizo desde el chat, y que debió avisarlo cuando cambió la forma de trabajo. Propuso usar Claude Code en la fase de ajustes visuales, porque ahí aporta más: trabaja directo sobre los archivos, ve la página en `localhost` con Playwright CLI, audita el diseño con Impeccable y aplica animaciones con Emil Kowalski.
-- **Mi decisión:** *(completar al terminar la fase visual con lo que se hizo en Claude Code).*
+- **Respuesta de la IA:** reconoció que Claude Code y sus complementos no se habían usado, ya que todo se hizo desde el chat, y que debió avisarlo cuando cambió la forma de trabajo. Preparó un `CLAUDE.md` con el contexto del proyecto y una guía de prompts para hacer la fase visual en Claude Code.
+- **Lo que hizo Claude Code:** configuró Impeccable y ordenó el CSS sin tocar el backend:
+  - Reemplazó los estilos escritos dentro del HTML (`style="..."`) por clases reutilizables.
+  - Creó una escala de espaciado y nombró todos los colores como variables.
+  - Mejoró el contraste de los bordes de los campos y del foco del teclado.
+- **Mi decisión:** conservé esos cambios porque dejan el código más ordenado, pero volví a trabajar desde el chat. Claude Code era rápido, pero hacía muchos cambios a la vez y me costaba seguir qué estaba modificando. En el chat trabajo **una pantalla por vez**: envío capturas e indico los cambios, la IA los prueba y me muestra capturas del resultado antes de entregarme los archivos. Así reviso y entiendo cada cambio.
+- **Limpieza:** quité los archivos que solo usaba Claude Code (`CLAUDE.md`, `PRODUCT.md`, `.agents/`, `skills-lock.json` y la guía de prompts). También convertí `requirements.txt` a UTF-8, porque PowerShell lo había guardado en UTF-16.
+
+### 3.11 Fotos del catálogo
+
+**Prompt:** "Ya tengo las imágenes para los productos, dime dónde las debo añadir."
+- **Respuesta de la IA:** advirtió que la carpeta `media/` (donde quedan las fotos subidas por el Admin) no se sube a GitHub, así que las fotos no llegarían al servidor de AWS. Propuso guardarlas en `inventario/fotos/`, que sí se sube, y que el comando `cargar_catalogo` las asigne solo a los productos e insumos sin imagen. Una foto subida desde el Admin nunca se reemplaza.
+- **Verificación:** se ejecutó el comando dos veces; la primera asignó las 11 fotos y la segunda no duplicó nada. El catálogo mostró todas las fotos sin errores.
+- **Mi decisión:** las fotos de los productos son **imágenes generadas con IA**, usadas como referencia porque el proyecto es académico y la pastelería no es real.
 
 ## 4. Aprendizajes y criterio propio
 

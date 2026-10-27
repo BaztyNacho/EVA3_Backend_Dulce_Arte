@@ -8,18 +8,44 @@ Se puede ejecutar varias veces sin duplicar nada:
 - Los insumos que ya existen conservan su stock actual (solo se actualiza unidad, costo y mínimo).
 - Los productos actualizan precio y descripción, y su receta se reemplaza por la de este archivo.
 - Los extras se actualizan y se vinculan a sus productos.
+- Las fotos de inventario/fotos/ se asignan solo a productos e insumos que aún no tienen
+  imagen (una foto subida desde el Admin nunca se reemplaza).
 
 Precios y costos aproximados en pesos chilenos (CLP), octubre de 2026.
 """
 
 from decimal import Decimal
+from pathlib import Path
 
+from django.core.files import File
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils.text import slugify
 
 from inventario.models import Insumo, OpcionPersonalizacion, Producto, RecetaItem
 
 D = Decimal
+
+# Carpeta con las fotos iniciales (sí se sube a GitHub, a diferencia de media/).
+CARPETA_FOTOS = Path(__file__).resolve().parents[2] / 'fotos'
+EXTENSIONES = ('.jpg', '.jpeg', '.png', '.webp')
+
+# Fotos de productos: nombre del producto -> nombre del archivo (sin extensión).
+FOTOS_PRODUCTOS = {
+    'Torta Chocolate Trufada': 'torta-trufada',
+    'Torta Tres Leches': 'torta-tres-leches',
+    'Torta Mil Hojas Manjar Nuez': 'torta-mil-hojas',
+    'Torta Selva Negra': 'torta-selva-negra',
+    'Torta de Lúcuma Manjar': 'torta-lucuma',
+    'Cheesecake de Frambuesa': 'cheesecake-frambuesa',
+    'Cupcakes Red Velvet (6 un)': 'cupcakes-red-velvet',
+    'Cupcakes Vainilla y Frutilla (6 un)': 'cupcakes-vainilla-frutilla',
+    'Pie de Limón': 'pie-limon',
+    'Tiramisú (8 porciones)': 'tiramisu',
+    'Brownies con Nuez (caja 12 un)': 'brownies-nuez',
+}
+# Las fotos de insumos usan el nombre del insumo en minúsculas, sin tildes y con guiones.
+# Ejemplo: "Azúcar flor" -> fotos/insumos/azucar-flor.jpg
 
 # ---------------------------------------------------------------
 # INSUMOS: nombre -> (unidad, costo por unidad CLP, stock inicial, stock mínimo)
@@ -327,4 +353,24 @@ class Command(BaseCommand):
                 [productos[d['nombre']] for d in PRODUCTOS if nombre in d['extras']]
             )
         self.stdout.write(self.style.SUCCESS(f'Extras: {len(EXTRAS)}, vinculados a sus productos.'))
+        fotos = sum(
+            self.asignar_foto(producto, 'productos', FOTOS_PRODUCTOS.get(nombre, slugify(nombre)))
+            for nombre, producto in productos.items()
+        )
+        fotos += sum(
+            self.asignar_foto(insumo, 'insumos', slugify(nombre)) for nombre, insumo in insumos.items()
+        )
+        self.stdout.write(self.style.SUCCESS(f'Fotos asignadas: {fotos}.'))
         self.stdout.write(self.style.SUCCESS('Catálogo de Dulce Arte cargado.'))
+
+    def asignar_foto(self, objeto, carpeta, nombre_archivo):
+        """Copia la foto de inventario/fotos/<carpeta>/ a media/ si el objeto aún no tiene imagen."""
+        if objeto.imagen:
+            return 0
+        for extension in EXTENSIONES:
+            ruta = CARPETA_FOTOS / carpeta / f'{nombre_archivo}{extension}'
+            if ruta.exists():
+                with ruta.open('rb') as archivo:
+                    objeto.imagen.save(ruta.name, File(archivo), save=True)
+                return 1
+        return 0

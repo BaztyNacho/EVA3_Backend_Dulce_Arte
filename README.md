@@ -118,7 +118,7 @@ CREATE DATABASE db_dulce_arte OWNER dulce_user;
 # 5. Preparar la base de datos y los datos iniciales
 python manage.py migrate
 python manage.py crear_roles        # grupos Administrador y Atención y Ventas
-python manage.py cargar_catalogo    # 30 insumos, 11 productos con receta y 18 extras
+python manage.py cargar_catalogo    # 30 insumos, 11 productos con receta, 18 extras y fotos
 python manage.py createsuperuser
 
 # 6. Ejecutar
