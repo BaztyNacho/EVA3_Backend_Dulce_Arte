@@ -1,0 +1,100 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block titulo %}Bodega{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Bodega</h1>
+    <p>El stock baja solo al confirmar pedidos. Aquí registras compras, mermas y correcciones.</p>
+  </div>
+</div>
+
+<nav class="chips" aria-label="Filtrar insumos" style="margin-bottom:1.5rem">
+  <a class="chip" href="{% url 'bodega' %}" {% if not solo_bajo %}aria-current="true"{% endif %}>Todos</a>
+  <a class="chip" href="{% url 'bodega' %}?stock=bajo" {% if solo_bajo %}aria-current="true"{% endif %}>Stock bajo ({{ total_bajo }})</a>
+</nav>
+
+<div class="grilla-2">
+  <section class="panel" aria-labelledby="t-insumos">
+    <h2 id="t-insumos" class="oculto-visual">Insumos</h2>
+    {% if insumos %}
+      <ul class="insumos">
+        {% for insumo in insumos %}
+          <li class="insumo{% if insumo.stock_bajo %} insumo--bajo{% endif %}">
+            <div class="insumo__fila">
+              <span class="insumo__nombre">{{ insumo.nombre }}</span>
+              <span class="insumo__cantidad">
+                {{ insumo.stock_actual|floatformat:"-3" }} {{ insumo.unidad }}
+              </span>
+            </div>
+            <div class="medidor" role="img"
+                 aria-label="Stock de {{ insumo.nombre }}: {{ insumo.stock_actual|floatformat:'-3' }} {{ insumo.unidad }}, mínimo {{ insumo.stock_minimo|floatformat:'-3' }}">
+              <span class="medidor__relleno" style="width: {{ insumo.porcentaje_barra }}%"></span>
+              <span class="medidor__minimo" style="left: {{ insumo.porcentaje_minimo }}%"></span>
+            </div>
+            <div class="insumo__fila nota">
+              <span>Mínimo: {{ insumo.stock_minimo|floatformat:"-3" }} {{ insumo.unidad }}</span>
+              {% if insumo.stock_bajo %}<span class="error-campo">Reponer</span>{% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="vacio">
+        <p>{% if solo_bajo %}Ningún insumo está bajo el mínimo.{% else %}No hay insumos registrados. Créalos en Administración.{% endif %}</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <aside>
+    <form class="panel" id="form-movimiento" style="margin-bottom:1.5rem" novalidate>
+      <h2>Registrar movimiento</h2>
+      <div class="campo">
+        <label for="m-insumo">Insumo</label>
+        <select id="m-insumo" required>
+          <option value="">Elige un insumo</option>
+          {% for insumo in insumos %}<option value="{{ insumo.pk }}">{{ insumo.nombre }} ({{ insumo.unidad }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="campo">
+        <label for="m-tipo">Tipo</label>
+        <select id="m-tipo">
+          <option value="entrada">Entrada: compra o reposición</option>
+          <option value="ajuste">Ajuste: merma o pérdida</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="m-cantidad">Cantidad</label>
+        <input type="number" id="m-cantidad" min="0.001" step="0.001" inputmode="decimal" required>
+      </div>
+      <div class="campo">
+        <label for="m-motivo">Motivo</label>
+        <input type="text" id="m-motivo" maxlength="200" placeholder="Ej.: compra a proveedor">
+      </div>
+      <button class="boton" type="submit" style="width:100%">Registrar movimiento</button>
+    </form>
+
+    <section class="panel" aria-labelledby="t-movimientos">
+      <h2 id="t-movimientos">Últimos movimientos</h2>
+      <ol class="linea-tiempo">
+        {% for mov in movimientos %}
+          <li>
+            <strong>{% if mov.tipo == 'entrada' or mov.tipo == 'devolucion' %}+{% else %}−{% endif %}{{ mov.cantidad|floatformat:"-3" }} {{ mov.insumo.unidad }}</strong>
+            {{ mov.insumo.nombre }}
+            <div class="nota">{{ mov.get_tipo_display }}{% if mov.motivo %}: {{ mov.motivo }}{% endif %}</div>
+            <time datetime="{{ mov.fecha|date:'c' }}">{{ mov.fecha|date:"j M, H:i" }}{% if mov.usuario %}, {{ mov.usuario.username }}{% endif %}</time>
+          </li>
+        {% empty %}
+          <li class="nota">Aún no hay movimientos.</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'web/js/bodega.js' %}"></script>
+{% endblock %}

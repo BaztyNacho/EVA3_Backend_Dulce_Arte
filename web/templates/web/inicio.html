@@ -25,7 +25,7 @@
     <strong>{{ entregas_hoy }}</strong><span>entregas programadas hoy</span>
   </div>
   {% if es_admin %}
-    <a class="cifra{% if insumos_bajos %} cifra--alerta{% endif %}" href="{% url 'admin:inventario_insumo_changelist' %}?stock=bajo">
+    <a class="cifra{% if insumos_bajos %} cifra--alerta{% endif %}" href="{% url 'bodega' %}?stock=bajo">
       <strong>{{ insumos_bajos|length }}</strong><span>insumos con stock bajo</span>
     </a>
   {% endif %}

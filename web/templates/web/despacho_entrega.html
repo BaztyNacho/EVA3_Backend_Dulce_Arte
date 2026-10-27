@@ -1,0 +1,103 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block titulo %}Entrega del pedido #{{ despacho.pedido_id }}{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Entrega del pedido #{{ despacho.pedido_id }}</h1>
+    <p>{% if despacho.ruta %}{{ despacho.ruta.nombre }}, parada {{ despacho.orden }}.{% else %}Sin ruta asignada.{% endif %}</p>
+  </div>
+  <a class="boton boton--secundario" href="{% url 'despachos' %}">Volver a despachos</a>
+</div>
+
+<div class="grilla-2">
+  <article class="comanda">
+    <div class="comanda__cabecera">
+      <span class="comanda__numero">Entregar a las</span>
+      <span class="estado estado--{% if despacho.estado == 'entregado' %}entregado{% elif despacho.estado == 'en_camino' %}en_despacho{% elif despacho.estado == 'fallido' %}cancelado{% else %}cotizacion{% endif %}">{{ despacho.get_estado_display }}</span>
+    </div>
+    <div class="comanda__hora" style="font-size:var(--t-xxl)">{{ despacho.pedido.fecha_entrega|date:"H:i" }}</div>
+    <div class="comanda__fecha">{{ despacho.pedido.fecha_entrega|date:"l j \d\e F" }}</div>
+    <div class="comanda__cliente">{{ despacho.pedido.cliente.nombre }}</div>
+    <p style="margin:0.25rem 0">{{ despacho.pedido.direccion_entrega }}</p>
+    <div class="comanda__acciones" style="margin:0.75rem 0">
+      <a class="boton boton--chico boton--secundario" target="_blank" rel="noopener"
+         href="https://www.google.com/maps/search/?api=1&query={{ despacho.pedido.direccion_entrega|urlencode }}">Abrir en el mapa</a>
+      <a class="boton boton--chico boton--secundario" href="tel:{{ despacho.pedido.cliente.telefono|cut:' ' }}">Llamar al cliente</a>
+    </div>
+    <ul class="comanda__lineas">
+      {% for detalle in despacho.pedido.detalles.all %}
+        <li>{{ detalle.cantidad }} × {{ detalle.producto.nombre }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <div>
+    {% if despacho.estado == 'entregado' %}
+      <section class="panel">
+        <h2>Entregado</h2>
+        <p>Recibió <strong>{{ despacho.nombre_receptor }}</strong> el {{ despacho.fecha_entrega_real|date:"j \d\e F, H:i" }}.</p>
+        {% if despacho.firma %}
+          <h3>Firma</h3>
+          <img class="firma-guardada" src="{{ despacho.firma.url }}" alt="Firma de {{ despacho.nombre_receptor }}">
+        {% endif %}
+        {% if despacho.comprobante %}
+          <h3 style="margin-top:1rem">Comprobante</h3>
+          <img class="imagen-referencia" src="{{ despacho.comprobante.url }}" alt="Foto del comprobante de entrega">
+        {% endif %}
+        {% if despacho.observaciones %}<p class="nota" style="margin-top:1rem">{{ despacho.observaciones }}</p>{% endif %}
+      </section>
+    {% else %}
+      <form class="panel" id="form-entrega" novalidate>
+        <h2>Confirmar entrega</h2>
+        <div class="campo">
+          <label for="receptor">Nombre de quien recibe</label>
+          <input type="text" id="receptor" maxlength="150" autocomplete="off" required>
+        </div>
+
+        <div class="campo">
+          <span class="etiqueta" id="etiqueta-firma">Firma</span>
+          <canvas id="firma" class="firma" aria-labelledby="etiqueta-firma"></canvas>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <small>Firma con el dedo o el mouse dentro del recuadro.</small>
+            <button type="button" class="quitar" id="borrar-firma">Borrar firma</button>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="comprobante">Foto del comprobante (opcional si hay firma)</label>
+          <input type="file" id="comprobante" accept="image/*" capture="environment">
+        </div>
+
+        <div class="campo">
+          <label for="obs">Observaciones (opcional)</label>
+          <textarea id="obs" rows="2" placeholder="Ej.: se dejó con el conserje"></textarea>
+        </div>
+
+        <button class="boton boton--grande" type="submit">Confirmar entrega</button>
+      </form>
+
+      <details class="panel" style="margin-top:1.5rem">
+        <summary><strong>No se pudo entregar</strong></summary>
+        <form id="form-fallido" style="margin-top:1rem">
+          <div class="campo">
+            <label for="motivo-fallido">¿Qué pasó?</label>
+            <input type="text" id="motivo-fallido" maxlength="200" placeholder="Ej.: no había nadie en el domicilio" required>
+          </div>
+          <button class="boton boton--peligro" type="submit">Registrar intento fallido</button>
+        </form>
+      </details>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const DESPACHO_ID = {{ despacho.pk }};
+  const URL_DESPACHOS = "{% url 'despachos' %}";
+</script>
+<script src="{% static 'web/js/firma.js' %}"></script>
+{% endblock %}

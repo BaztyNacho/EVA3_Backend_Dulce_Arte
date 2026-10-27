@@ -16,7 +16,8 @@ from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
-from inventario.models import Insumo, OpcionPersonalizacion, Producto
+from despachos.models import Despacho, Ruta
+from inventario.models import Insumo, MovimientoInsumo, OpcionPersonalizacion, Producto
 from pedidos.models import Pedido
 from pedidos.permisos import es_administrador, es_ventas
 
@@ -149,3 +150,66 @@ def pedido_detalle(request, pk):
         'puede_cancelar': es_administrador(request.user)
         and pedido.estado not in [Pedido.Estado.EN_DESPACHO, Pedido.Estado.ENTREGADO, Pedido.Estado.CANCELADO],
     })
+
+
+# ---------------------------------------------------------------
+# Vistas del Administrador: cocina, bodega y despachos
+# ---------------------------------------------------------------
+@rol_requerido(solo_admin=True)
+def kanban(request):
+    """Tablero de cocina. Las tarjetas se cargan y mueven con JavaScript usando la API."""
+    columnas = [(estado, Pedido.Estado(estado).label) for estado in Pedido.ESTADOS_KANBAN]
+    return render(request, 'web/kanban.html', {'columnas': columnas})
+
+
+@rol_requerido(solo_admin=True)
+def bodega(request):
+    solo_bajo = request.GET.get('stock') == 'bajo'
+    insumos = Insumo.objects.filter(activo=True).order_by('nombre')
+    if solo_bajo:
+        insumos = insumos.filter(stock_actual__lte=F('stock_minimo'))
+
+    # Para la barra de cada insumo: la escala es 3 veces el stock mínimo
+    # (o el stock actual, si es mayor). La marca indica dónde está el mínimo.
+    insumos = list(insumos)
+    for insumo in insumos:
+        escala = max(insumo.stock_minimo * 3, insumo.stock_actual, 1)
+        insumo.porcentaje_barra = round(insumo.stock_actual / escala * 100)
+        insumo.porcentaje_minimo = round(insumo.stock_minimo / escala * 100)
+
+    return render(request, 'web/bodega.html', {
+        'insumos': insumos,
+        'solo_bajo': solo_bajo,
+        'total_bajo': Insumo.objects.filter(activo=True, stock_actual__lte=F('stock_minimo')).count(),
+        'movimientos': MovimientoInsumo.objects.select_related('insumo', 'usuario', 'pedido')[:8],
+        'tipos': MovimientoInsumo.Tipo.choices,
+    })
+
+
+@rol_requerido(solo_admin=True)
+def despachos(request):
+    hoy = timezone.localdate()
+    activos = Despacho.objects.exclude(estado=Despacho.Estado.ENTREGADO).select_related(
+        'pedido__cliente', 'ruta'
+    ).order_by('pedido__fecha_entrega')
+    return render(request, 'web/despachos.html', {
+        'sin_ruta': activos.filter(ruta__isnull=True),
+        'rutas': Ruta.objects.exclude(estado=Ruta.Estado.FINALIZADA).prefetch_related(
+            'despachos__pedido__cliente'
+        ).order_by('fecha', 'nombre'),
+        'entregados_hoy': Despacho.objects.filter(
+            estado=Despacho.Estado.ENTREGADO, fecha_entrega_real__date=hoy
+        ).select_related('pedido__cliente'),
+        'hoy': hoy,
+    })
+
+
+@rol_requerido(solo_admin=True)
+def despacho_entrega(request, pk):
+    despacho = get_object_or_404(
+        Despacho.objects.select_related('pedido__cliente', 'ruta').prefetch_related(
+            'pedido__detalles__producto'
+        ),
+        pk=pk,
+    )
+    return render(request, 'web/despacho_entrega.html', {'despacho': despacho})

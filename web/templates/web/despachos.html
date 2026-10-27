@@ -1,0 +1,119 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block titulo %}Despachos{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Despachos</h1>
+    <p>Los pedidos con despacho aparecen aquí cuando salen de cocina. Agrúpalos en rutas y confirma cada entrega con firma o foto.</p>
+  </div>
+</div>
+
+<div class="grilla-2">
+  <div>
+    <section aria-labelledby="t-sin-ruta" style="margin-bottom:2rem">
+      <h2 id="t-sin-ruta">Por asignar ({{ sin_ruta|length }})</h2>
+      {% if sin_ruta %}
+        <div class="paradas">
+          {% for despacho in sin_ruta %}
+            <article class="parada">
+              <div class="parada__datos">
+                <strong>Pedido #{{ despacho.pedido_id }}, {{ despacho.pedido.cliente.nombre }}</strong>
+                <span>{{ despacho.pedido.direccion_entrega }}</span>
+                <span class="nota">Entregar {{ despacho.pedido.fecha_entrega|date:"l j, H:i" }}</span>
+                {% if despacho.estado == 'fallido' %}<span class="estado estado--cancelado">Intento fallido</span>{% endif %}
+              </div>
+              {% if rutas %}
+                <form class="parada__asignar" data-despacho="{{ despacho.pk }}">
+                  <label class="oculto-visual" for="ruta-{{ despacho.pk }}">Ruta para el pedido {{ despacho.pedido_id }}</label>
+                  <select id="ruta-{{ despacho.pk }}" required>
+                    {% for ruta in rutas %}<option value="{{ ruta.pk }}">{{ ruta.nombre }} ({{ ruta.fecha|date:"j M" }})</option>{% endfor %}
+                  </select>
+                  <button class="boton boton--chico" type="submit">Asignar</button>
+                </form>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="panel vacio"><p>No hay despachos por asignar.</p></div>
+      {% endif %}
+    </section>
+
+    {% for ruta in rutas %}
+      <section class="panel ruta" aria-labelledby="ruta-{{ ruta.pk }}" style="margin-bottom:1.5rem">
+        <header class="ruta__cabecera">
+          <div>
+            <h2 id="ruta-{{ ruta.pk }}">{{ ruta.nombre }}</h2>
+            <span class="nota">{{ ruta.fecha|date:"l j \d\e F" }}{% if ruta.responsable %}, a cargo de {{ ruta.responsable.username }}{% endif %}</span>
+          </div>
+          <div class="comanda__acciones">
+            <span class="estado estado--{% if ruta.estado == 'en_curso' %}en_preparacion{% else %}recibido{% endif %}">{{ ruta.get_estado_display }}</span>
+            {% if ruta.estado == 'planificada' %}
+              <button class="boton boton--chico" type="button" data-ruta-estado="en_curso" data-ruta="{{ ruta.pk }}">Iniciar ruta</button>
+            {% elif ruta.estado == 'en_curso' %}
+              <button class="boton boton--chico boton--secundario" type="button" data-ruta-estado="finalizada" data-ruta="{{ ruta.pk }}">Finalizar ruta</button>
+            {% endif %}
+          </div>
+        </header>
+        <ol class="paradas paradas--ruta">
+          {% for despacho in ruta.despachos.all %}
+            <li class="parada{% if despacho.estado == 'entregado' %} parada--hecha{% endif %}">
+              <div class="parada__datos">
+                <strong>{{ despacho.pedido.cliente.nombre }}</strong>
+                <span>{{ despacho.pedido.direccion_entrega }}</span>
+                <span class="nota">Pedido #{{ despacho.pedido_id }}, {{ despacho.pedido.fecha_entrega|date:"H:i" }}</span>
+              </div>
+              <div class="comanda__acciones">
+                <span class="estado estado--{% if despacho.estado == 'entregado' %}entregado{% elif despacho.estado == 'en_camino' %}en_despacho{% elif despacho.estado == 'fallido' %}cancelado{% else %}cotizacion{% endif %}">{{ despacho.get_estado_display }}</span>
+                {% if despacho.estado != 'entregado' %}
+                  <a class="boton boton--chico" href="{% url 'despacho_entrega' despacho.pk %}">Entregar</a>
+                  <button class="quitar" type="button" data-quitar="{{ despacho.pk }}">Quitar de la ruta</button>
+                {% endif %}
+              </div>
+            </li>
+          {% empty %}
+            <li class="nota">Sin paradas. Asigna despachos desde "Por asignar".</li>
+          {% endfor %}
+        </ol>
+      </section>
+    {% endfor %}
+  </div>
+
+  <aside>
+    <form class="panel" id="form-ruta" style="margin-bottom:1.5rem" novalidate>
+      <h2>Nueva ruta</h2>
+      <div class="campo">
+        <label for="r-nombre">Nombre</label>
+        <input type="text" id="r-nombre" maxlength="100" placeholder="Ej.: Ruta oriente, tarde" required>
+      </div>
+      <div class="campo">
+        <label for="r-fecha">Fecha de reparto</label>
+        <input type="date" id="r-fecha" value="{{ hoy|date:'Y-m-d' }}" required>
+      </div>
+      <button class="boton" type="submit" style="width:100%">Crear ruta</button>
+    </form>
+
+    <section class="panel" aria-labelledby="t-entregados">
+      <h2 id="t-entregados">Entregados hoy</h2>
+      <ol class="linea-tiempo">
+        {% for despacho in entregados_hoy %}
+          <li>
+            <strong>Pedido #{{ despacho.pedido_id }}</strong> {{ despacho.pedido.cliente.nombre }}
+            <div class="nota">Recibió {{ despacho.nombre_receptor }}</div>
+            <time datetime="{{ despacho.fecha_entrega_real|date:'c' }}">{{ despacho.fecha_entrega_real|date:"H:i" }}</time>
+          </li>
+        {% empty %}
+          <li class="nota">Aún no hay entregas hoy.</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'web/js/despachos.js' %}"></script>
+{% endblock %}

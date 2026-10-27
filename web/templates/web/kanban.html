@@ -1,0 +1,34 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block titulo %}Cocina{% endblock %}
+
+{% block clase_pagina %}pagina--ancha{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Cocina</h1>
+    <p>Arrastra cada comanda a la columna siguiente cuando termine una etapa, o usa su botón. El tablero se actualiza solo cada minuto.</p>
+  </div>
+  <button class="boton boton--secundario" type="button" id="actualizar">Actualizar ahora</button>
+</div>
+
+<div class="tablero" id="tablero" aria-busy="true">
+  {% for estado, titulo in columnas %}
+    <section class="columna" aria-labelledby="col-{{ estado }}">
+      <header class="columna__cabecera">
+        <h2 id="col-{{ estado }}">{{ titulo }}</h2>
+        <span class="columna__cuenta" data-cuenta="{{ estado }}">0</span>
+      </header>
+      <div class="columna__lista" data-estado="{{ estado }}"></div>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>const URL_DETALLE = "{% url 'pedido_detalle' 0 %}";</script>
+<script src="{% static 'web/vendor/Sortable.min.js' %}"></script>
+<script src="{% static 'web/js/kanban.js' %}"></script>
+{% endblock %}

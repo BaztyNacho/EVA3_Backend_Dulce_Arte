@@ -21,7 +21,9 @@
         <a href="{% url 'pedidos_lista' %}" {% if ruta == 'pedidos_lista' or ruta == 'pedido_detalle' %}aria-current="page"{% endif %}>Pedidos</a>
         <a href="{% url 'pedido_nuevo' %}" {% if ruta == 'pedido_nuevo' %}aria-current="page"{% endif %}>Nueva cotización</a>
         {% if es_admin %}
-          {% block nav_admin %}{% endblock %}
+          <a href="{% url 'kanban' %}" {% if ruta == 'kanban' %}aria-current="page"{% endif %}>Cocina</a>
+          <a href="{% url 'bodega' %}" {% if ruta == 'bodega' %}aria-current="page"{% endif %}>Bodega</a>
+          <a href="{% url 'despachos' %}" {% if ruta == 'despachos' or ruta == 'despacho_entrega' %}aria-current="page"{% endif %}>Despachos</a>
           <a href="{% url 'admin:index' %}">Administración</a>
         {% endif %}
         {% endwith %}
@@ -36,7 +38,7 @@
     </div>
   </header>
 
-  <main class="pagina" id="contenido">
+  <main class="pagina {% block clase_pagina %}{% endblock %}" id="contenido">
     {% if messages %}
       <ul class="mensajes">
         {% for mensaje in messages %}
