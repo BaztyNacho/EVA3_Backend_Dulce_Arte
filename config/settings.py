@@ -37,6 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Librerías externas
     'rest_framework',
+    # Apps del proyecto Dulce Arte
+    'inventario',
+    'pedidos',
+    'despachos',
 ]
 
 MIDDLEWARE = [
@@ -116,9 +120,16 @@ USE_TZ = True
 
 
 # ---------------------------------------------------------------
-# Archivos estáticos (CSS, JavaScript, imágenes)
+# Archivos estáticos (CSS, JavaScript, imágenes del diseño)
 # ---------------------------------------------------------------
 STATIC_URL = 'static/'
+
+
+# ---------------------------------------------------------------
+# Archivos subidos por usuarios (fotos de productos, firmas, comprobantes)
+# ---------------------------------------------------------------
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
