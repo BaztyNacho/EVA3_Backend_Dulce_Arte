@@ -2,13 +2,20 @@
 Configuración del Django Admin para la app PEDIDOS.
 """
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Count
 from django.utils.html import format_html
 
 from inventario.admin import etiqueta, formato_clp
 
 from .models import Cliente, DetallePedido, HistorialEstado, Pedido, PersonalizacionDetalle
+from .services import (
+    ReglaNegocioError,
+    avanzar_estado,
+    cancelar_pedido,
+    confirmar_cotizacion,
+    rechazar_control_calidad,
+)
 
 # Colores de cada estado del pedido (fondo, texto)
 COLORES_ESTADO = {
@@ -56,6 +63,20 @@ class DetallePedidoInline(admin.TabularInline):
     def subtotal_formateado(self, obj):
         return formato_clp(obj.subtotal) if obj.pk else '—'
 
+    # Regla de negocio: los productos solo se modifican mientras el pedido es cotización,
+    # porque al confirmarlo ya se descontaron los insumos.
+    def _es_editable(self, pedido):
+        return pedido is None or pedido.estado == Pedido.Estado.COTIZACION
+
+    def has_add_permission(self, request, obj=None):
+        return self._es_editable(obj) and super().has_add_permission(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        return self._es_editable(obj) and super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return self._es_editable(obj) and super().has_delete_permission(request, obj)
+
 
 class HistorialEstadoInline(admin.TabularInline):
     """Trazabilidad del pedido: solo lectura."""
@@ -87,8 +108,16 @@ class PedidoAdmin(admin.ModelAdmin):
     search_fields = ['id', 'cliente__nombre', 'cliente__telefono', 'diseno']
     date_hierarchy = 'fecha_entrega'
     autocomplete_fields = ['cliente']
-    readonly_fields = ['total_formateado', 'vista_referencia', 'creado_por', 'creado_en', 'actualizado_en']
+    readonly_fields = [
+        'estado',
+        'total_formateado',
+        'vista_referencia',
+        'creado_por',
+        'creado_en',
+        'actualizado_en',
+    ]
     inlines = [DetallePedidoInline, HistorialEstadoInline]
+    actions = ['accion_confirmar', 'accion_avanzar', 'accion_rechazar_calidad', 'accion_cancelar']
     fieldsets = [
         ('Cliente y entrega', {'fields': ['cliente', 'fecha_entrega', 'tipo_entrega', 'direccion_entrega']}),
         ('Estado', {'fields': ['estado', 'total_formateado']}),
@@ -118,26 +147,62 @@ class PedidoAdmin(admin.ModelAdmin):
         return 'Sin imagen de referencia'
 
     def save_model(self, request, obj, form, change):
-        if not change:
+        nuevo = not change
+        if nuevo:
             obj.creado_por = request.user
-        # Guardamos el estado anterior para registrar la trazabilidad.
-        estado_anterior = ''
-        if change:
-            estado_anterior = Pedido.objects.get(pk=obj.pk).estado
         super().save_model(request, obj, form, change)
-        if estado_anterior != obj.estado:
+        if nuevo:
             HistorialEstado.objects.create(
                 pedido=obj,
-                estado_anterior=estado_anterior,
                 estado_nuevo=obj.estado,
                 usuario=request.user,
-                comentario='Cambio realizado desde el panel de administración',
+                comentario='Cotización creada',
             )
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         # Regla de negocio: el total se recalcula después de guardar los productos.
         form.instance.calcular_total()
+
+    # ---------------------------------------------------------------
+    # Acciones: los cambios de estado SOLO se hacen con estas acciones,
+    # que aplican las reglas de negocio de pedidos/services.py
+    # ---------------------------------------------------------------
+    def _ejecutar(self, request, queryset, funcion, mensaje_exito):
+        for pedido in queryset:
+            try:
+                resultado = funcion(pedido, request.user)
+            except ReglaNegocioError as error:
+                self.message_user(request, str(error), messages.ERROR)
+                continue
+            self.message_user(request, mensaje_exito.format(pedido=pedido), messages.SUCCESS)
+            if funcion is confirmar_cotizacion and resultado:
+                nombres = ', '.join(insumo.nombre for insumo in resultado)
+                self.message_user(
+                    request, f'Atención: quedaron con stock bajo: {nombres}.', messages.WARNING
+                )
+
+    @admin.action(description='Confirmar cotización (descuenta insumos)')
+    def accion_confirmar(self, request, queryset):
+        self._ejecutar(
+            request, queryset, confirmar_cotizacion,
+            'Pedido #{pedido.pk} confirmado: insumos descontados y enviado a cocina.',
+        )
+
+    @admin.action(description='Avanzar al siguiente estado del Kanban')
+    def accion_avanzar(self, request, queryset):
+        self._ejecutar(request, queryset, avanzar_estado, 'Pedido #{pedido.pk} avanzó de estado.')
+
+    @admin.action(description='Rechazar en control de calidad (vuelve a preparación)')
+    def accion_rechazar_calidad(self, request, queryset):
+        self._ejecutar(
+            request, queryset, rechazar_control_calidad,
+            'Pedido #{pedido.pk} devuelto a En Preparación.',
+        )
+
+    @admin.action(description='Cancelar pedido')
+    def accion_cancelar(self, request, queryset):
+        self._ejecutar(request, queryset, cancelar_pedido, 'Pedido #{pedido.pk} cancelado.')
 
 
 class PersonalizacionDetalleInline(admin.TabularInline):
@@ -150,6 +215,18 @@ class PersonalizacionDetalleInline(admin.TabularInline):
     @admin.display(description='Precio adicional')
     def precio_adicional_formateado(self, obj):
         return formato_clp(obj.precio_adicional) if obj.pk else '—'
+
+    def _es_editable(self, detalle):
+        return detalle is None or detalle.pedido.estado == Pedido.Estado.COTIZACION
+
+    def has_add_permission(self, request, obj=None):
+        return self._es_editable(obj) and super().has_add_permission(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        return self._es_editable(obj) and super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        return self._es_editable(obj) and super().has_delete_permission(request, obj)
 
 
 @admin.register(DetallePedido)
@@ -166,6 +243,16 @@ class DetallePedidoAdmin(admin.ModelAdmin):
     @admin.display(description='Subtotal')
     def subtotal_formateado(self, obj):
         return formato_clp(obj.subtotal)
+
+    def has_change_permission(self, request, obj=None):
+        if obj and obj.pedido.estado != Pedido.Estado.COTIZACION:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and obj.pedido.estado != Pedido.Estado.COTIZACION:
+            return False
+        return super().has_delete_permission(request, obj)
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)

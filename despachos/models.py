@@ -99,6 +99,12 @@ class Despacho(models.Model):
 
         # Regla de negocio: para confirmar la entrega se exige evidencia.
         if self.estado == self.Estado.ENTREGADO:
+            estados_validos = [Pedido.Estado.EN_DESPACHO, Pedido.Estado.ENTREGADO]
+            if self.pedido_id and self.pedido.estado not in estados_validos:
+                errores['pedido'] = (
+                    'Solo se puede entregar un pedido que esté "En Despacho" '
+                    '(primero debe pasar por todo el flujo de cocina).'
+                )
             if not self.firma and not self.comprobante:
                 errores['estado'] = (
                     'Para marcar como entregado se requiere la firma o la foto del comprobante.'
