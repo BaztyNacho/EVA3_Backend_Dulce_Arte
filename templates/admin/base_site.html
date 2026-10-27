@@ -1,0 +1,92 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  /* Paleta Dulce Arte: chocolate, frambuesa, caramelo y crema */
+  :root, html[data-theme="light"] {
+    --primary: #C8456C;
+    --secondary: #4A2C2A;
+    --accent: #E0A458;
+    --primary-fg: #FFFFFF;
+    --header-bg: #4A2C2A;
+    --header-color: #F7E7CE;
+    --header-branding-color: #F7E7CE;
+    --header-link-color: #F7E7CE;
+    --breadcrumbs-bg: #6B3E3A;
+    --breadcrumbs-fg: #F3DCD4;
+    --breadcrumbs-link-fg: #FFFFFF;
+    --link-fg: #A8325A;
+    --link-hover-color: #4A2C2A;
+    --link-selected-fg: #4A2C2A;
+    --button-bg: #C8456C;
+    --button-hover-bg: #A8325A;
+    --default-button-bg: #A8325A;
+    --default-button-hover-bg: #8E2449;
+    --selected-row: #FCE8EE;
+  }
+  html[data-theme="dark"] {
+    --primary: #C8456C;
+    --secondary: #3A2220;
+    --accent: #E0A458;
+    --header-bg: #3A2220;
+    --header-color: #F7E7CE;
+    --header-branding-color: #F7E7CE;
+    --breadcrumbs-bg: #4A2C2A;
+    --link-fg: #F08CAB;
+    --link-hover-color: #E0A458;
+    --link-selected-fg: #E0A458;
+    --button-bg: #C8456C;
+    --button-hover-bg: #A8325A;
+    --default-button-bg: #A8325A;
+    --default-button-hover-bg: #8E2449;
+    --selected-row: #3D2730;
+  }
+  @media (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) {
+      --secondary: #3A2220;
+      --header-bg: #3A2220;
+      --breadcrumbs-bg: #4A2C2A;
+      --link-fg: #F08CAB;
+      --link-hover-color: #E0A458;
+      --link-selected-fg: #E0A458;
+      --selected-row: #3D2730;
+    }
+  }
+  #site-name a {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 26px;
+    letter-spacing: 0.5px;
+  }
+  #site-name .subtitulo {
+    display: block;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .module h2, .module caption, .inline-group h2 {
+    letter-spacing: 0.3px;
+  }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}">Dulce Arte</a>
+  <span class="subtitulo">Pastelería artesanal · Panel de gestión</span>
+</div>
+{% if user.is_anonymous %}
+  {% include "admin/color_theme_toggle.html" %}
+{% endif %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
