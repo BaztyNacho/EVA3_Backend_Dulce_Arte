@@ -427,6 +427,38 @@ a.cifra:hover { border-color: var(--frambuesa); }
 }
 .firma-guardada { background: #fff; border: 1px solid var(--borde); border-radius: 8px; max-width: 100%; }
 
+/* =================================================================
+   IMÁGENES con reemplazo elegante (cuando no hay foto)
+   ================================================================= */
+.foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; display: block; }
+.foto--vacia { display: grid; place-items: center; }
+.foto--vacia span {
+  font-family: var(--fuente-titulo); font-size: 3rem; font-weight: 600; line-height: 1;
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+}
+.foto--tono-0 { background: var(--frambuesa-clara); color: var(--frambuesa-oscura); }
+.foto--tono-1 { background: var(--caramelo-claro); color: #8A5A12; }
+.foto--tono-2 { background: var(--pistacho-claro); color: #2F5A27; }
+.foto--tono-3 { background: #F1E4DE; color: var(--chocolate); }
+
+/* =================================================================
+   CATÁLOGO — una ficha por producto, en una columna
+   ================================================================= */
+.catalogo-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; max-width: 960px; }
+.ficha {
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 1.25rem;
+  background: var(--papel); border: 1px solid var(--borde); border-radius: var(--radio); padding: 1rem;
+}
+.ficha__cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.ficha__nombre { font-size: var(--t-l); margin: 0.1rem 0 0.5rem; }
+.ficha__precio { font-family: var(--fuente-titulo); font-size: var(--t-xl); font-weight: 600; white-space: nowrap; }
+.ficha__datos { margin: 0 0 1rem; display: grid; gap: 0.6rem; font-size: var(--t-s); }
+.ficha__datos dt { font-weight: 600; }
+.ficha__datos dd { margin: 0; color: var(--chocolate-suave); }
+@media (max-width: 640px) {
+  .ficha { grid-template-columns: 1fr; }
+}
+
 /* ---------------- Movimiento: solo como respuesta ---------------- */
 @media (prefers-reduced-motion: no-preference) {
   .linea-pedido.nueva { animation: aparecer 0.25s ease-out; }

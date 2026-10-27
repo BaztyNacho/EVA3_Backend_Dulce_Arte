@@ -9,9 +9,8 @@ Este documento registra cómo se usó la IA durante el desarrollo: qué se le pi
 
 | Herramienta | Uso |
 |---|---|
-| **Claude (chat, Anthropic)** | Herramienta principal: análisis del enunciado, diseño de la arquitectura y del modelo de datos, generación de código paso a paso, depuración de errores y guía de despliegue en AWS. |
-| **Claude Code** (instalado en Windows 11) | Asistente de programación en la terminal, con los complementos Context7 (documentación actualizada de Django/DRF), Pro Workflow (memoria entre sesiones), Playwright CLI (pruebas en navegador), Impeccable y Emil Kowalski (criterios de diseño y animación). |
-| **Playwright** (vía la IA) | Pruebas automáticas en un navegador real de todos los flujos antes de entregar cada parte. |
+| **Claude (chat, Anthropic)** | Herramienta usada en todo el backend, la interfaz inicial y el despliegue: análisis del enunciado, diseño de la arquitectura y del modelo de datos, generación de código paso a paso, depuración de errores y guía de despliegue en AWS. La IA ejecutaba y probaba el código en su propio entorno (incluidas pruebas en navegador con Playwright) antes de entregarlo. |
+| **Claude Code** (instalado en Windows 11) | Instalado al inicio con los complementos Context7, Pro Workflow, Playwright CLI, Impeccable y Emil Kowalski. Hasta la entrega del backend y el despliegue **no se utilizó**: el trabajo se hizo completo desde el chat. Se reservó para la fase de ajustes visuales (ver sección 3.10). |
 
 **Forma de trabajo acordada con la IA:**
 - Avanzar paso a paso, con explicación de cada cambio para poder defenderlo.
@@ -138,10 +137,30 @@ Este documento registra cómo se usó la IA durante el desarrollo: qué se le pi
 **Prompt:** "Dame un listado de 10 nuevos productos de repostería, con los insumos necesarios y 2 o 3 extras por producto; precios y cantidades a tu criterio considerando valores chilenos."
 - **Resultado:** comando `cargar_catalogo`, con 30 insumos, 11 productos con receta y 18 extras. Es reutilizable en local y en el servidor sin duplicar datos.
 
+### 3.9 Nuevas funciones: catálogo, tiempos e imágenes
+
+**Prompt:** lista de ajustes propia. Para Atención y Ventas, un **Catálogo** con nombre, descripción, ingredientes, precio y tiempo de preparación de cada producto. Para el Administrador: confirmación al mover pedidos en Cocina, Bodega en tarjetas con imagen y botones para agregar o registrar mermas, y el Admin con la temática del proyecto (sin cambiar sus funciones).
+- **Respuesta de la IA:** clasificó la lista en cambios de backend y cambios solo visuales. Los de backend (los hizo en el chat, con pruebas):
+  - Campo `tiempo_preparacion` (minutos, informativo) en Producto y campo `imagen` en Insumo, con la migración 0004.
+  - Página `/catalogo/` solo para Atención y Ventas, con imagen o reemplazo elegante (inicial sobre color) cuando no hay foto.
+  - Botón "Cotizar este producto" que abre el cotizador con el producto ya agregado.
+  - `CLAUDE.md` actualizado y una guía de prompts para hacer lo visual en Claude Code.
+- **Mis decisiones:**
+  - El tiempo de preparación es solo informativo, no cambia la regla de 24 horas.
+  - El catálogo es solo para Ventas, como apoyo para atender al cliente.
+  - En la bodega se registran tanto entradas como mermas.
+  - Las fotos de insumos y productos las tomo yo.
+
+### 3.10 Uso de Claude Code (pendiente)
+
+**Prompt:** "Dentro de todo lo que hemos realizado, ¿en qué momento utilizamos Claude Code? Inicialmente solicité herramientas y plugins de diseño para que la página se viera profesional, con animaciones y transiciones."
+- **Respuesta de la IA:** reconoció que Claude Code y sus complementos no se habían usado, ya que todo se hizo desde el chat, y que debió avisarlo cuando cambió la forma de trabajo. Propuso usar Claude Code en la fase de ajustes visuales, porque ahí aporta más: trabaja directo sobre los archivos, ve la página en `localhost` con Playwright CLI, audita el diseño con Impeccable y aplica animaciones con Emil Kowalski.
+- **Mi decisión:** *(completar al terminar la fase visual con lo que se hizo en Claude Code).*
+
 ## 4. Aprendizajes y criterio propio
 
 - **La IA aceleró mucho la escritura de código**, pero las decisiones del negocio fueron mías: los roles, la regla de 24 horas, el sistema de extras, firma y foto, el catálogo y la prioridad entre funcionalidad y diseño.
 - **Probar antes de confiar:** cada entrega se acompañó de pruebas automáticas o capturas. Varias detectaron errores reales (el 502 de Gunicorn, problemas visuales en móvil).
 - **Seguridad:** aprendí a separar los secretos del código (`.env`), a no compartir claves, a usar un usuario de base de datos dedicado y a explicar por qué el sitio no tiene HTTPS sin un dominio propio.
 - **Arquitectura:** entendí el recorrido Nginx → Gunicorn → Django → PostgreSQL y por qué `runserver` no se usa en producción.
-- **Límites de la IA:** a veces necesitó aclaraciones mías (por ejemplo, que los extras debían ser distintos por producto), y sus primeras versiones de la interfaz tuvieron detalles que corregimos tras revisarlas.
+- **Límites de la IA:** a veces necesitó aclaraciones mías (por ejemplo, que los extras debían ser distintos por producto), y sus primeras versiones de la interfaz tuvieron detalles que corregimos tras revisarlas. También aprendí a revisar que las herramientas que pedí se usaran de verdad: los plugins de diseño quedaron instalados pero sin uso hasta que pregunté por ellos.

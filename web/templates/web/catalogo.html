@@ -1,0 +1,69 @@
+{% extends 'web/base.html' %}
+{% load dulce %}
+
+{% block titulo %}Catálogo{% endblock %}
+
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Catálogo</h1>
+    <p>Productos disponibles para la venta, con lo que el cliente suele preguntar: ingredientes, extras, precio y tiempo de preparación.</p>
+  </div>
+</div>
+
+{% if categorias|length > 1 %}
+  <nav class="chips" aria-label="Filtrar por categoría" style="margin-bottom:1.75rem">
+    <a class="chip" href="{% url 'catalogo' %}" {% if not categoria_actual %}aria-current="true"{% endif %}>Todos</a>
+    {% for valor, nombre in categorias %}
+      <a class="chip" href="?categoria={{ valor }}" {% if valor == categoria_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>
+    {% endfor %}
+  </nav>
+{% endif %}
+
+{% if productos %}
+  <ul class="catalogo-lista">
+    {% for producto in productos %}
+      <li class="ficha" id="producto-{{ producto.pk }}">
+        {% include 'web/_imagen.html' with imagen=producto.imagen nombre=producto.nombre clase='ficha__foto' %}
+        <div class="ficha__cuerpo">
+          <div class="ficha__cabecera">
+            <div>
+              <span class="nota">{{ producto.get_categoria_display }}</span>
+              <h2 class="ficha__nombre">{{ producto.nombre }}</h2>
+            </div>
+            <div class="ficha__precio">{{ producto.precio_base|clp }}</div>
+          </div>
+
+          {% if producto.descripcion %}<p>{{ producto.descripcion }}</p>{% endif %}
+
+          <dl class="ficha__datos">
+            <div>
+              <dt>Ingredientes</dt>
+              <dd>
+                {% for item in producto.receta.all %}{{ item.insumo.nombre }}{% if not forloop.last %}, {% endif %}{% empty %}Sin receta registrada{% endfor %}
+              </dd>
+            </div>
+            <div>
+              <dt>Extras disponibles</dt>
+              <dd>
+                {% for extra in producto.opciones.all %}{% if extra.activo %}{{ extra.nombre }} ({{ extra.precio_por_porcion|clp }} por porción){% if not forloop.last %}, {% endif %}{% endif %}{% empty %}Sin extras{% endfor %}
+              </dd>
+            </div>
+            <div>
+              <dt>Tiempo de preparación</dt>
+              <dd>{{ producto.tiempo_legible }}</dd>
+            </div>
+          </dl>
+
+          <a class="boton boton--chico" href="{% url 'pedido_nuevo' %}?producto={{ producto.pk }}">Cotizar este producto</a>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="panel vacio">
+    <p>No hay productos disponibles en esta categoría.</p>
+    <a class="boton boton--secundario" href="{% url 'catalogo' %}">Ver todo el catálogo</a>
+  </div>
+{% endif %}
+{% endblock %}

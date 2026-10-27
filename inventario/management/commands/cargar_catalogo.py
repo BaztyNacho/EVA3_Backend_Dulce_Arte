@@ -83,11 +83,12 @@ EXTRAS = {
 }
 
 # ---------------------------------------------------------------
-# PRODUCTOS: receta por UNA unidad del producto y sus extras
+# PRODUCTOS: receta por UNA unidad del producto, tiempo de preparación (minutos) y extras
 # ---------------------------------------------------------------
 PRODUCTOS = [
     {
         'nombre': 'Torta Chocolate Trufada',
+        'tiempo': 180,
         'categoria': 'torta',
         'precio': 28000,
         'descripcion': 'Bizcocho húmedo de chocolate relleno con ganache trufada. Rinde 15 porciones.',
@@ -100,6 +101,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Torta Tres Leches',
+        'tiempo': 150,
         'categoria': 'torta',
         'precio': 32000,
         'descripcion': 'Bizcocho esponjoso bañado en tres leches y cubierto con crema chantilly. Rinde 15 porciones.',
@@ -117,6 +119,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Torta Mil Hojas Manjar Nuez',
+        'tiempo': 240,
         'categoria': 'torta',
         'precio': 38000,
         'descripcion': 'Capas de hojarasca crujiente con abundante manjar y nueces. Rinde 15 porciones.',
@@ -131,6 +134,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Torta Selva Negra',
+        'tiempo': 210,
         'categoria': 'torta',
         'precio': 36000,
         'descripcion': 'Bizcocho de chocolate con crema, cerezas en almíbar y virutas de chocolate. Rinde 15 porciones.',
@@ -148,6 +152,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Torta de Lúcuma Manjar',
+        'tiempo': 180,
         'categoria': 'torta',
         'precio': 35000,
         'descripcion': 'Bizcocho de vainilla con crema de lúcuma y una capa de manjar. Rinde 15 porciones.',
@@ -163,6 +168,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Cheesecake de Frambuesa',
+        'tiempo': 300,
         'categoria': 'postre',
         'precio': 31000,
         'descripcion': 'Base de galleta, crema de queso horneada y cobertura de frambuesas. Rinde 12 porciones.',
@@ -179,6 +185,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Cupcakes Red Velvet (6 un)',
+        'tiempo': 90,
         'categoria': 'cupcake',
         'precio': 11900,
         'descripcion': 'Seis cupcakes red velvet con frosting de queso crema.',
@@ -197,6 +204,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Cupcakes Vainilla y Frutilla (6 un)',
+        'tiempo': 75,
         'categoria': 'cupcake',
         'precio': 9900,
         'descripcion': 'Seis cupcakes de vainilla con crema y frutillas frescas.',
@@ -214,6 +222,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Pie de Limón',
+        'tiempo': 150,
         'categoria': 'postre',
         'precio': 19900,
         'descripcion': 'Base de galleta, relleno cremoso de limón y merengue tostado. Rinde 10 porciones.',
@@ -229,6 +238,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Tiramisú (8 porciones)',
+        'tiempo': 270,
         'categoria': 'postre',
         'precio': 26000,
         'descripcion': 'Capas de soletillas con café y crema de mascarpone, espolvoreado con cacao.',
@@ -245,6 +255,7 @@ PRODUCTOS = [
     },
     {
         'nombre': 'Brownies con Nuez (caja 12 un)',
+        'tiempo': 60,
         'categoria': 'postre',
         'precio': 15900,
         'descripcion': 'Doce brownies húmedos de chocolate semiamargo con nueces.',
@@ -291,6 +302,7 @@ class Command(BaseCommand):
                 defaults={
                     'categoria': datos['categoria'],
                     'precio_base': datos['precio'],
+                    'tiempo_preparacion': datos['tiempo'],
                     'descripcion': datos['descripcion'],
                     'activo': True,
                 },

@@ -22,6 +22,7 @@ class InsumoSerializer(serializers.ModelSerializer):
             'stock_minimo',
             'stock_bajo',
             'costo_unitario',
+            'imagen',
             'activo',
         ]
 
@@ -54,6 +55,7 @@ class ProductoSerializer(serializers.ModelSerializer):
             'categoria_display',
             'descripcion',
             'precio_base',
+            'tiempo_preparacion',
             'imagen',
             'activo',
             'receta',

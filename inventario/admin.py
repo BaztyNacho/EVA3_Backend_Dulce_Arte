@@ -48,6 +48,7 @@ class StockBajoFilter(admin.SimpleListFilter):
 @admin.register(Insumo)
 class InsumoAdmin(admin.ModelAdmin):
     list_display = [
+        'miniatura',
         'nombre',
         'unidad',
         'stock_actual',
@@ -56,12 +57,14 @@ class InsumoAdmin(admin.ModelAdmin):
         'costo_formateado',
         'activo',
     ]
+    list_display_links = ['miniatura', 'nombre']
     list_filter = [StockBajoFilter, 'unidad', 'activo']
     search_fields = ['nombre']
     list_editable = ['activo']
-    readonly_fields = ['creado_en', 'actualizado_en']
+    readonly_fields = ['vista_previa', 'creado_en', 'actualizado_en']
     fieldsets = [
         ('Datos del insumo', {'fields': ['nombre', 'unidad', 'costo_unitario', 'activo']}),
+        ('Imagen', {'fields': ['imagen', 'vista_previa']}),
         ('Control de stock', {'fields': ['stock_actual', 'stock_minimo']}),
         ('Auditoría', {'fields': ['creado_en', 'actualizado_en'], 'classes': ['collapse']}),
     ]
@@ -72,6 +75,21 @@ class InsumoAdmin(admin.ModelAdmin):
         if obj:
             return self.readonly_fields + ['stock_actual']
         return self.readonly_fields
+
+    @admin.display(description='Foto')
+    def miniatura(self, obj):
+        if obj.imagen:
+            return format_html(
+                '<img src="{}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">',
+                obj.imagen.url,
+            )
+        return '—'
+
+    @admin.display(description='Vista previa')
+    def vista_previa(self, obj):
+        if obj.imagen:
+            return format_html('<img src="{}" style="max-width:200px;border-radius:12px;">', obj.imagen.url)
+        return 'Sin imagen'
 
     @admin.display(description='Estado')
     def estado_stock(self, obj):
@@ -101,6 +119,7 @@ class ProductoAdmin(admin.ModelAdmin):
         'nombre',
         'categoria',
         'precio_formateado',
+        'tiempo',
         'insumos_en_receta',
         'activo',
     ]
@@ -111,7 +130,7 @@ class ProductoAdmin(admin.ModelAdmin):
     readonly_fields = ['vista_previa', 'creado_en', 'actualizado_en']
     inlines = [RecetaItemInline]
     fieldsets = [
-        ('Datos del producto', {'fields': ['nombre', 'categoria', 'descripcion', 'precio_base', 'activo']}),
+        ('Datos del producto', {'fields': ['nombre', 'categoria', 'descripcion', 'precio_base', 'tiempo_preparacion', 'activo']}),
         ('Imagen', {'fields': ['imagen', 'vista_previa']}),
         ('Auditoría', {'fields': ['creado_en', 'actualizado_en'], 'classes': ['collapse']}),
     ]
@@ -139,6 +158,10 @@ class ProductoAdmin(admin.ModelAdmin):
     @admin.display(description='Precio base', ordering='precio_base')
     def precio_formateado(self, obj):
         return formato_clp(obj.precio_base)
+
+    @admin.display(description='Preparación', ordering='tiempo_preparacion')
+    def tiempo(self, obj):
+        return obj.tiempo_legible
 
     @admin.display(description='Insumos en receta', ordering='num_insumos')
     def insumos_en_receta(self, obj):

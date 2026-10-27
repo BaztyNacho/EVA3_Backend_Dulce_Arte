@@ -22,8 +22,12 @@ from pedidos.models import Pedido
 from pedidos.permisos import es_administrador, es_ventas
 
 
-def rol_requerido(*, solo_admin=False):
-    """Permite el acceso solo a usuarios con rol. Con solo_admin=True, solo al Administrador."""
+def rol_requerido(*, solo_admin=False, solo_ventas=False):
+    """
+    Permite el acceso solo a usuarios con rol.
+    solo_admin=True  -> solo el Administrador.
+    solo_ventas=True -> solo Atención y Ventas.
+    """
 
     def decorador(vista):
         @wraps(vista)
@@ -31,6 +35,8 @@ def rol_requerido(*, solo_admin=False):
         def envoltura(request, *args, **kwargs):
             usuario = request.user
             if solo_admin and not es_administrador(usuario):
+                raise PermissionDenied
+            if solo_ventas and not es_ventas(usuario):
                 raise PermissionDenied
             if not (es_administrador(usuario) or es_ventas(usuario)):
                 raise PermissionDenied
@@ -110,6 +116,27 @@ def pedidos_lista(request):
         'filtro_actual': filtro,
         'texto': texto,
         'limite_urgente': timezone.now() + timedelta(hours=3),
+    })
+
+
+@rol_requerido(solo_ventas=True)
+def catalogo(request):
+    """Catálogo para atender a clientes: productos disponibles con sus detalles."""
+    categoria = request.GET.get('categoria', '')
+    productos = (
+        Producto.objects.filter(activo=True)
+        .prefetch_related('receta__insumo', 'opciones')
+        .order_by('categoria', 'nombre')
+    )
+    if categoria in Producto.Categoria.values:
+        productos = productos.filter(categoria=categoria)
+    categorias_con_productos = set(
+        Producto.objects.filter(activo=True).values_list('categoria', flat=True)
+    )
+    return render(request, 'web/catalogo.html', {
+        'productos': productos,
+        'categorias': [c for c in Producto.Categoria.choices if c[0] in categorias_con_productos],
+        'categoria_actual': categoria,
     })
 
 

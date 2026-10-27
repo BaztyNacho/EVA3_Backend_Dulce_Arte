@@ -352,3 +352,8 @@ $('#cotizador').addEventListener('submit', async (evento) => {
 
 dibujarCatalogo();
 dibujarResumen();
+
+// Si se llega desde el Catálogo con ?producto=<id>, ese producto queda agregado.
+const productoInicial = Number(new URLSearchParams(window.location.search).get('producto'));
+const encontrado = PRODUCTOS.find((p) => p.id === productoInicial);
+if (encontrado) agregarLinea(encontrado);

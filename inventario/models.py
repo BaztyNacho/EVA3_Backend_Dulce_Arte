@@ -48,6 +48,7 @@ class Insumo(models.Model):
         default=0,
         help_text='Costo en pesos chilenos por cada unidad de medida.',
     )
+    imagen = models.ImageField('imagen', upload_to='insumos/', blank=True)
     activo = models.BooleanField('activo', default=True)
     creado_en = models.DateTimeField('creado en', auto_now_add=True)
     actualizado_en = models.DateTimeField('actualizado en', auto_now=True)
@@ -82,6 +83,11 @@ class Producto(models.Model):
     )
     descripcion = models.TextField('descripción', blank=True)
     precio_base = models.PositiveIntegerField('precio base (CLP)')
+    tiempo_preparacion = models.PositiveIntegerField(
+        'tiempo de preparación (minutos)',
+        default=0,
+        help_text='Tiempo aproximado que toma elaborar una unidad. Es informativo.',
+    )
     imagen = models.ImageField('imagen', upload_to='productos/', blank=True)
     activo = models.BooleanField('activo', default=True)
     creado_en = models.DateTimeField('creado en', auto_now_add=True)
@@ -94,6 +100,16 @@ class Producto(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    @property
+    def tiempo_legible(self):
+        """Tiempo de preparación en texto: 210 -> "3 h 30 min"."""
+        horas, minutos = divmod(self.tiempo_preparacion, 60)
+        if horas and minutos:
+            return f'{horas} h {minutos} min'
+        if horas:
+            return f'{horas} h'
+        return f'{minutos} min'
 
 
 class RecetaItem(models.Model):

@@ -18,6 +18,9 @@
       <nav class="nav" aria-label="Principal">
         {% with ruta=request.resolver_match.url_name %}
         <a href="{% url 'inicio' %}" {% if ruta == 'inicio' %}aria-current="page"{% endif %}>Inicio</a>
+        {% if es_ventas %}
+          <a href="{% url 'catalogo' %}" {% if ruta == 'catalogo' %}aria-current="page"{% endif %}>Catálogo</a>
+        {% endif %}
         <a href="{% url 'pedidos_lista' %}" {% if ruta == 'pedidos_lista' or ruta == 'pedido_detalle' %}aria-current="page"{% endif %}>Pedidos</a>
         <a href="{% url 'pedido_nuevo' %}" {% if ruta == 'pedido_nuevo' %}aria-current="page"{% endif %}>Nueva cotización</a>
         {% if es_admin %}

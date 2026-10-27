@@ -1,0 +1,9 @@
+{% load dulce %}
+{# Imagen con reemplazo elegante. Recibe: imagen (ImageField), nombre (texto), clase (opcional). #}
+{% if imagen %}
+  <img class="foto {{ clase }}" src="{{ imagen.url }}" alt="{{ nombre }}" loading="lazy">
+{% else %}
+  <div class="foto foto--vacia foto--tono-{{ nombre|tono }} {{ clase }}" role="img" aria-label="{{ nombre }} (sin foto)">
+    <span>{{ nombre|inicial }}</span>
+  </div>
+{% endif %}

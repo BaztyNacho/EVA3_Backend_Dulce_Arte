@@ -43,7 +43,7 @@ Dulce Arte no tenía coordinación entre la toma de pedidos personalizados, la d
 | Rol | Acceso |
 |---|---|
 | **Administrador** | Todo: cocina (Kanban), bodega, despachos, Django Admin y API completa. |
-| **Atención y Ventas** | Cotizar, registrar y confirmar pedidos, consultar su estado. Sin acceso a cocina, bodega, despachos ni Admin. |
+| **Atención y Ventas** | Catálogo para atender clientes, cotizar, registrar y confirmar pedidos, consultar su estado. Sin acceso a cocina, bodega, despachos ni Admin. |
 
 - Autenticación con sesiones de Django; la API usa la misma sesión con protección CSRF.
 - Permisos por grupo (`DjangoModelPermissions`) y reglas por rol en la API y en las vistas.
@@ -80,6 +80,7 @@ Navegador ──► Nginx (puerto 80) ──► Gunicorn ──► Django + DRF 
 |---|---|
 | `/ingresar/` | Inicio de sesión |
 | `/` | Inicio con resumen del día |
+| `/catalogo/` | Catálogo de productos con ingredientes, extras, precio y tiempo de preparación (Atención y Ventas) |
 | `/pedidos/` · `/pedidos/nuevo/` | Lista de pedidos y cotizador |
 | `/cocina/` | Tablero Kanban (Administrador) |
 | `/bodega/` | Stock y movimientos (Administrador) |
