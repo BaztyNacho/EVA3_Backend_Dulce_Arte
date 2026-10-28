@@ -2,28 +2,27 @@
 
 {% block titulo %}Pedidos{% endblock %}
 
-{% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Pedidos</h1>
-    <p>{{ pagina.paginator.count }} pedido{{ pagina.paginator.count|pluralize }} en esta vista.</p>
+{% block titulo_banner %}Pedidos{% endblock %}
+{% block subtitulo_banner %}{{ pagina.paginator.count }} pedido{{ pagina.paginator.count|pluralize }} en esta vista.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <nav class="chips" aria-label="Filtrar por estado">
+      {% for valor, nombre in filtros %}
+        <a class="chip" href="?estado={{ valor }}{% if texto %}&q={{ texto|urlencode }}{% endif %}"
+           {% if valor == filtro_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>
+      {% endfor %}
+    </nav>
+    <a class="boton" href="{% url 'pedido_nuevo' %}">Crear cotización</a>
   </div>
-  <a class="boton" href="{% url 'pedido_nuevo' %}">Crear cotización</a>
-</div>
+{% endblock %}
 
+{% block contenido %}
 <form class="filtros" method="get" role="search">
   <input type="hidden" name="estado" value="{{ filtro_actual }}">
   <label class="oculto-visual" for="buscar">Buscar pedido</label>
   <input type="search" id="buscar" name="q" value="{{ texto }}" placeholder="Cliente, teléfono o n° de pedido">
   <button class="boton boton--secundario" type="submit">Buscar</button>
 </form>
-
-<nav class="chips espacio-abajo" aria-label="Filtrar por estado">
-  {% for valor, nombre in filtros %}
-    <a class="chip" href="?estado={{ valor }}{% if texto %}&q={{ texto|urlencode }}{% endif %}"
-       {% if valor == filtro_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>
-  {% endfor %}
-</nav>
 
 {% if pagina.object_list %}
   <div class="comandas">

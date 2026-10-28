@@ -2,9 +2,11 @@
 
 {% block titulo %}Sin acceso{% endblock %}
 
+{% block titulo_banner %}Sin acceso{% endblock %}
+
 {% block contenido %}
 <div class="panel vacio">
-  <h1>No tienes acceso a esta sección</h1>
+  <h2>No tienes acceso a esta sección</h2>
   <p>Tu usuario no tiene el rol necesario. Si crees que es un error, pide al Administrador que revise tus permisos.</p>
   <a class="boton" href="{% url 'inicio' %}">Ir al inicio</a>
 </div>

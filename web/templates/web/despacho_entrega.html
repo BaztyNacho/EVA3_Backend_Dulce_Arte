@@ -3,17 +3,18 @@
 
 {% block titulo %}Entrega del pedido #{{ despacho.pedido_id }}{% endblock %}
 
-{% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Entrega del pedido #{{ despacho.pedido_id }}</h1>
-    <p>{% if despacho.ruta %}{{ despacho.ruta.nombre }}, parada {{ despacho.orden }}.{% else %}Sin ruta asignada.{% endif %}</p>
+{% block titulo_banner %}Entrega del pedido #{{ despacho.pedido_id }}{% endblock %}
+{% block subtitulo_banner %}{% if despacho.ruta %}{{ despacho.ruta.nombre }}, parada {{ despacho.orden }}.{% else %}Sin ruta asignada.{% endif %}{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <a class="boton boton--secundario" href="{% url 'despachos' %}">Volver a despachos</a>
   </div>
-  <a class="boton boton--secundario" href="{% url 'despachos' %}">Volver a despachos</a>
-</div>
+{% endblock %}
 
+{% block contenido %}
 <div class="grilla-2">
   <article class="comanda">
+    {% include 'web/_sello.html' with estado=despacho.pedido.estado %}
     <div class="comanda__cabecera">
       <span class="comanda__numero">Entregar a las</span>
       <span class="estado estado--{% if despacho.estado == 'entregado' %}entregado{% elif despacho.estado == 'en_camino' %}en_despacho{% elif despacho.estado == 'fallido' %}cancelado{% else %}cotizacion{% endif %}">{{ despacho.get_estado_display }}</span>

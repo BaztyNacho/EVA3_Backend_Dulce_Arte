@@ -3,14 +3,10 @@
 
 {% block titulo %}Despachos{% endblock %}
 
-{% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Despachos</h1>
-    <p>Los pedidos con despacho aparecen aquí cuando salen de cocina. Agrúpalos en rutas y confirma cada entrega con firma o foto.</p>
-  </div>
-</div>
+{% block titulo_banner %}Despachos{% endblock %}
+{% block subtitulo_banner %}Los pedidos con despacho llegan aquí al salir de cocina. Agrúpalos en rutas y confirma cada entrega con firma o foto.{% endblock %}
 
+{% block contenido %}
 <div class="grilla-2">
   <div>
     <section class="espacio-abajo-grande" aria-labelledby="t-sin-ruta">
@@ -19,6 +15,7 @@
         <div class="paradas">
           {% for despacho in sin_ruta %}
             <article class="parada">
+              {% if despacho.estado == 'fallido' %}{% include 'web/_sello.html' with estado='cancelado' %}{% else %}{% include 'web/_sello.html' with estado='en_despacho' %}{% endif %}
               <div class="parada__datos">
                 <strong>Pedido #{{ despacho.pedido_id }}, {{ despacho.pedido.cliente.nombre }}</strong>
                 <span>{{ despacho.pedido.direccion_entrega }}</span>
@@ -61,6 +58,7 @@
         <ol class="paradas paradas--ruta">
           {% for despacho in ruta.despachos.all %}
             <li class="parada{% if despacho.estado == 'entregado' %} parada--hecha{% endif %}">
+              {% if despacho.estado == 'entregado' %}{% include 'web/_sello.html' with estado='entregado' %}{% elif despacho.estado == 'fallido' %}{% include 'web/_sello.html' with estado='cancelado' %}{% else %}{% include 'web/_sello.html' with estado='en_despacho' %}{% endif %}
               <div class="parada__datos">
                 <strong>{{ despacho.pedido.cliente.nombre }}</strong>
                 <span>{{ despacho.pedido.direccion_entrega }}</span>

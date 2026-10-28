@@ -73,6 +73,12 @@
   --espacio-6: 2rem;
   --espacio-7: 3rem;
 
+  /* Barra superior */
+  --barra-fondo: #2E1A16;
+  --alto-logo: 118px;        /* el logo sobresale hacia abajo de la barra */
+
+  --marco-tablero: #7A4232;   /* marco café del Kanban */
+
   --radio: 10px;
   --sombra-papel: 0 1px 0 rgba(59, 36, 32, 0.06), 0 6px 18px -10px rgba(59, 36, 32, 0.35);
   --sombra-papel-alzada: 0 1px 0 rgba(59, 36, 32, 0.06), 0 10px 24px -10px rgba(158, 47, 85, 0.45);
@@ -86,7 +92,8 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: var(--vainilla);
+  /* Fondo de papel acuarela en todas las pantallas (fondo-web.jpg) */
+  background: var(--vainilla) url('../img/fondo-web.jpg') center top / cover fixed;
   color: var(--chocolate);
   font-family: var(--fuente-texto);
   font-size: var(--t-m);
@@ -135,49 +142,163 @@ img { max-width: 100%; display: block; }
 .ancho-completo { width: 100%; }
 .fila-extremos { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-4); }
 
-/* ---------------- Barra superior ---------------- */
+/* ---------------- Barra superior ----------------
+   Enlaces a ambos lados, logo al centro (sobresale hacia abajo) y un borde
+   de círculos que imita la cortina de una pastelería. */
 .barra {
-  background: var(--chocolate);
+  position: relative;
+  z-index: 5;
+  background: var(--barra-fondo);
   color: var(--vainilla);
+}
+.barra::after {           /* cortina: medios círculos colgando bajo la barra */
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  height: 12px;
+  background: radial-gradient(circle at 12px 0, var(--barra-fondo) 11.5px, transparent 12px) 0 0 / 24px 12px repeat-x;
+  pointer-events: none;
 }
 .barra__contenido {
-  max-width: 1180px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: var(--espacio-3) var(--espacio-4);
-  display: flex;
+  padding: 0 var(--espacio-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--espacio-5);
-  flex-wrap: wrap;
+  gap: var(--espacio-4);
+  min-height: 64px;
 }
 .marca {
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-xl);
-  font-weight: 600;
-  color: var(--vainilla);
-  text-decoration: none;
-  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  position: relative;
+  z-index: 2;
+  align-self: start;
+  display: block;
+  margin: 2px 0 calc(66px - var(--alto-logo));   /* la barra mide ~66px; el resto del logo cuelga */
+  border-radius: 50%;
 }
-.marca:hover { color: var(--caramelo); }
-.nav { display: flex; gap: var(--espacio-1); flex-wrap: wrap; flex: 1; }
+.marca img {
+  height: var(--alto-logo);
+  width: auto;
+  filter: drop-shadow(0 6px 10px rgba(30, 15, 12, 0.35));
+}
+.nav { display: flex; gap: var(--espacio-1); flex-wrap: wrap; align-items: center; }
+.nav--izquierda { justify-content: flex-end; }
+.barra__derecha { display: flex; align-items: center; justify-content: space-between; gap: var(--espacio-4); }
 .nav a {
   color: var(--barra-texto);
   text-decoration: none;
-  padding: 0.4rem var(--espacio-3);
+  padding: 0.4rem 0.65rem;
   border-radius: 999px;
   font-size: var(--t-s);
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 .nav a:hover { background: var(--barra-hover); color: var(--papel); }
 .nav a[aria-current='page'] { background: var(--frambuesa); color: var(--papel); }
-.usuario { display: flex; align-items: center; gap: var(--espacio-3); font-size: var(--t-s); color: var(--barra-texto-suave); }
+.usuario { display: flex; align-items: center; gap: var(--espacio-3); font-size: var(--t-s); color: var(--barra-texto-suave); line-height: 1.3; text-align: right; }
+.usuario small { display: block; font-size: var(--t-xs); }
+/* En escritorio: nombre arriba y "Cerrar sesión" debajo, para dejar espacio a los enlaces */
+@media (min-width: 1241px) {
+  .usuario { flex-direction: column; align-items: flex-end; gap: 0.25rem; }
+  .usuario small { display: inline; }
+  .usuario small::before { content: '· '; }
+  .usuario form button { padding: 0.15rem 0.65rem; font-size: var(--t-xs); }
+}
 .usuario form { margin: 0; }
 .usuario button {
   background: none; border: 1px solid var(--barra-linea); color: var(--barra-texto);
-  padding: 0.3rem 0.7rem; border-radius: 999px; cursor: pointer; font: inherit;
+  padding: 0.3rem 0.7rem; border-radius: 999px; cursor: pointer; font: inherit; white-space: nowrap;
 }
 .usuario button:hover { border-color: var(--caramelo); color: var(--papel); }
 
+/* Pantallas medianas y celular: logo arriba, enlaces centrados debajo */
+@media (max-width: 1240px) {
+  .barra__contenido {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: var(--espacio-2);
+    padding: var(--espacio-2) var(--espacio-4) var(--espacio-3);
+  }
+  .marca { order: -1; margin: 0; }
+  .marca img { height: 84px; }
+  .nav, .nav--izquierda { justify-content: center; }
+  .barra__derecha { display: contents; }
+  .usuario { margin-top: var(--espacio-1); }
+}
+
+/* ---------------- Banner con el título de la página (en todas las pantallas) ---------------- */
+.banner {
+  position: relative;
+  z-index: 1;
+  background: #351109 url('../img/fondo-banner.png') center / cover;
+  padding: 64px var(--espacio-4) 48px;
+  text-align: center;
+}
+/* Difuminado crema arriba: separa el banner de la barra (ambos son café oscuro) */
+.banner::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 64px;
+  background: linear-gradient(180deg,
+    rgba(250, 234, 212, 0.95) 0%,
+    rgba(250, 234, 212, 0.55) 40%,
+    rgba(250, 234, 212, 0) 100%);
+  pointer-events: none;
+}
+.banner > * { position: relative; }   /* el contenido va sobre el difuminado */
+.banner__titulo {
+  margin: 0;
+  color: var(--papel);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 0 var(--chocolate), 0 4px 18px rgba(30, 15, 12, 0.6);
+}
+.banner__subtitulo {
+  margin: var(--espacio-2) auto 0;
+  max-width: 60ch;
+  color: var(--barra-texto);
+  text-shadow: 0 1px 2px rgba(30, 15, 12, 0.9), 0 0 10px rgba(30, 15, 12, 0.9);
+}
+.banner__subtitulo:empty { display: none; }
+
+/* Filtros y botones: centrados justo en el borde entre el banner y el fondo */
+.banner__opciones {
+  position: absolute;
+  left: 50%; bottom: 0;
+  transform: translate(-50%, 50%);
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: var(--espacio-2);
+}
+.banner__opciones .chips { justify-content: center; }
+.banner__opciones .chip,
+.banner__opciones .boton {
+  font-size: var(--t-m);
+  padding: 0.45rem 1.1rem;
+  box-shadow: 0 4px 12px -4px rgba(30, 15, 12, 0.45);
+}
+.banner__opciones .boton--secundario { background: var(--papel); border-color: var(--borde); }
+.banner__opciones .boton--secundario:hover { background: var(--caramelo-claro); }
+.banner + .pagina { padding-top: 3.5rem; }
+
+@media (max-width: 1240px) {
+  .banner { padding-top: 40px; }
+}
+/* En celular las opciones van dentro del banner (pueden ocupar varias líneas) */
+@media (max-width: 640px) {
+  .banner { padding-bottom: var(--espacio-5); }
+  .banner__opciones { position: static; transform: none; margin: var(--espacio-4) auto 0; }
+  .banner__opciones .chip,
+  .banner__opciones .boton { font-size: var(--t-s); padding: 0.35rem 0.8rem; }
+  .banner + .pagina { padding-top: var(--espacio-5); }
+}
+
 /* ---------------- Estructura ---------------- */
-.pagina { max-width: 1180px; margin: 0 auto; padding: var(--espacio-6) var(--espacio-4) 4rem; }
+.pagina { max-width: 1180px; margin: 0 auto; padding: 4.5rem var(--espacio-4) 4rem; }  /* arriba deja espacio al logo */
+@media (max-width: 1240px) { .pagina { padding-top: var(--espacio-6); } }
 .pagina--ancha { max-width: 1600px; }
 .encabezado {
   display: flex; justify-content: space-between; align-items: flex-end;
@@ -394,12 +515,22 @@ a.cifra:hover { border-color: var(--frambuesa); }
 
 /* ---------------- Login ---------------- */
 .acceso {
-  min-height: 100vh; display: grid; place-items: center; padding: var(--espacio-5);
-  background: var(--vainilla);
+  min-height: 100vh; display: grid; place-items: center; padding: 6rem var(--espacio-5) var(--espacio-5);
+  background: var(--caramelo-claro) url('../img/fondo-login.jpg') center / cover;
 }
-.acceso .comanda { width: min(420px, 100%); padding: var(--espacio-6); }
-.acceso h1 { font-size: var(--t-xxl); margin-bottom: var(--espacio-1); }
-.acceso p { color: var(--chocolate-suave); }
+.acceso__tarjeta {
+  width: min(320px, 100%);
+  padding: 0 var(--espacio-5) var(--espacio-5);
+  border: 1px solid var(--borde);
+}
+/* El logo sobresale por arriba de la tarjeta */
+.acceso__logo {
+  width: 214px;
+  height: auto;
+  margin: -72px auto var(--espacio-2);
+  filter: drop-shadow(0 6px 12px rgba(59, 36, 32, 0.25));
+}
+.acceso .campo label { font-size: var(--t-s); }
 
 /* ---------------- Botones pequeños y acciones de comanda ---------------- */
 .boton--chico { padding: 0.4rem 0.85rem; font-size: var(--t-s); }
@@ -414,11 +545,17 @@ a.cifra:hover { border-color: var(--frambuesa); }
   grid-template-columns: repeat(5, minmax(220px, 1fr));
   gap: var(--espacio-4);
   overflow-x: auto;
-  padding-bottom: var(--espacio-4);
   scroll-snap-type: x proximity;
+  /* Marco café que separa visualmente cada etapa */
+  background: var(--marco-tablero);
+  border-radius: 18px;
+  padding: var(--espacio-5);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.08), 0 14px 30px -18px rgba(30, 15, 12, 0.7);
 }
+@media (max-width: 640px) { .tablero { padding: var(--espacio-3); border-radius: 14px; } }
 .columna {
   background: var(--fondo-columna);
+  box-shadow: 0 2px 0 rgba(30, 15, 12, 0.18);
   border-radius: var(--radio);
   padding: var(--espacio-3);
   min-height: 60vh;
@@ -437,22 +574,142 @@ a.cifra:hover { border-color: var(--frambuesa); }
 .comanda--kanban { cursor: grab; touch-action: pan-y; }
 .comanda--kanban .comanda__hora { font-size: var(--t-l); }
 .comanda--kanban .comanda__lineas { margin-top: 0.4rem; }
+/* Sello de estado: círculo con figura, como una estampa en la esquina.
+   Los dibujos están en web/_sellos.html; aquí se definen tamaño, posición y color. */
+.comanda, .parada { position: relative; }
+.comanda__sello {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;              /* recorta el sello en el borde, sin cortar el borde perforado */
+  border-radius: inherit;
+  pointer-events: none;
+}
+.comanda__sello svg {
+  position: absolute;
+  top: 6px; right: -22px;
+  width: 112px; height: 112px;
+  opacity: 0.3;
+  transform: rotate(-12deg);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* En las paradas de despacho (filas), el sello es más chico y va centrado a la derecha */
+.parada:has(.comanda__sello) { padding-right: 76px; }   /* deja libre el espacio del sello */
+.parada .comanda__sello svg { width: 84px; height: 84px; top: 50%; right: -16px; transform: translateY(-50%) rotate(-12deg); }
+/* El texto y los botones quedan sobre el sello */
+.comanda > :not(.comanda__sello, .oculto-visual),
+.parada > :not(.comanda__sello, .oculto-visual) { position: relative; }
+.sello--cotizacion { color: #8A7F7A; }
+.sello--recibido { color: #7A4232; }
+.sello--en_preparacion { color: #D9A21B; }
+.sello--horneado_decorado { color: #7B4FB8; }
+.sello--control_calidad { color: #3A74B8; }
+.sello--listo { color: #4F8A45; }
+.sello--en_despacho { color: #C8456C; }
+.sello--entregado { color: #2F5A27; }
+.sello--cancelado { color: #B3261E; }
 .comanda--fantasma { opacity: 0.35; }
 .comanda--arrastrada { transform: rotate(2deg); cursor: grabbing; }
-.rechazo { margin-top: var(--espacio-3); padding-top: var(--espacio-3); border-top: 1px dashed var(--borde); display: grid; gap: 0.4rem; }
 
 /* =================================================================
-   BODEGA
+   BODEGA — vitrina de insumos en tarjetas
    ================================================================= */
-.insumos { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
-.insumo__fila { display: flex; justify-content: space-between; gap: var(--espacio-4); align-items: baseline; }
-.insumo__nombre { font-weight: 600; }
-.insumo__cantidad { font-variant-numeric: tabular-nums; font-weight: 600; }
-.medidor { position: relative; height: 10px; background: var(--fondo-medidor); border-radius: 999px; margin: 0.4rem 0 0.3rem; }
-.medidor__relleno { position: absolute; inset: 0 auto 0 0; background: var(--pistacho); border-radius: 999px; }
-.medidor__minimo { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--chocolate); opacity: 0.55; }
-.insumo--bajo .medidor__relleno { background: var(--alerta); }
-.insumo--bajo .insumo__cantidad { color: var(--alerta); }
+.vitrina {
+  background: rgba(255, 250, 242, 0.75);
+  border: 2px solid var(--caramelo-claro);
+  border-radius: 18px;
+  padding: var(--espacio-5);
+}
+.insumos-grilla {
+  list-style: none; margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+  gap: var(--espacio-5) var(--espacio-4);
+}
+.tarjeta-insumo {
+  display: flex; flex-direction: column; gap: var(--espacio-2);
+  background: var(--papel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: var(--espacio-3);
+  box-shadow: var(--sombra-papel);
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.18s cubic-bezier(0.2, 0, 0, 1);
+}
+@media (hover: hover) {
+  .tarjeta-insumo:hover { transform: translateY(-2px); box-shadow: var(--sombra-papel-alzada); }
+}
+.tarjeta-insumo__nombre {
+  margin: 0;
+  font-size: var(--t-m);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-height: 2.4em;              /* nombres de 1 o 2 líneas quedan alineados */
+  display: grid; place-items: center;
+}
+.tarjeta-insumo__foto { aspect-ratio: 1 / 1; border-radius: 8px; }
+.tarjeta-insumo__foto.foto--vacia span { font-size: 2.6rem; }
+.tarjeta-insumo__cantidad { margin: 0; font-size: var(--t-s); display: flex; justify-content: space-between; gap: var(--espacio-2); }
+.tarjeta-insumo__cantidad { flex-wrap: wrap; }
+.tarjeta-insumo__cantidad strong { font-variant-numeric: tabular-nums; white-space: nowrap; margin-left: auto; }
+.tarjeta-insumo__minimo { margin: -0.3rem 0 0; font-size: var(--t-xs); color: var(--chocolate-suave); display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-1); }
+.tarjeta-insumo .boton { margin-top: auto; }
+.tarjeta-insumo--bajo { border-color: var(--alerta-borde); box-shadow: 0 0 0 2px var(--alerta-borde), var(--sombra-papel); }
+.tarjeta-insumo--bajo .tarjeta-insumo__cantidad strong { color: var(--alerta); }
+.etiqueta-reponer {
+  background: var(--alerta-clara); color: var(--alerta); font-weight: 600;
+  border-radius: 999px; padding: 0 0.5rem; font-size: var(--t-xs);
+}
+@media (max-width: 640px) {
+  .vitrina { padding: var(--espacio-3); }
+  .insumos-grilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--espacio-3); }
+  .tarjeta-insumo__nombre { font-size: var(--t-s); }
+}
+
+/* =================================================================
+   VENTANAS (modales) — se usa el elemento <dialog> del navegador,
+   que ya mantiene el foco dentro y se cierra con Escape.
+   ================================================================= */
+.ventana {
+  width: min(440px, calc(100% - 2rem));
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  border: 0;
+  border-radius: 14px;
+  padding: var(--espacio-5);
+  background: var(--papel);
+  color: var(--chocolate);
+  box-shadow: 0 24px 60px -20px rgba(30, 15, 12, 0.6);
+}
+.ventana::backdrop { background: rgba(30, 15, 12, 0.55); }
+.ventana h2 { font-size: var(--t-xl); margin-bottom: var(--espacio-2); }
+.ventana__detalle { color: var(--chocolate-suave); margin: 0 0 var(--espacio-4); }
+.ventana__etapas { display: flex; align-items: center; gap: var(--espacio-2); flex-wrap: wrap; margin: var(--espacio-2) 0 var(--espacio-3); font-weight: 600; }
+.ventana__etapas .estado { font-size: var(--t-s); }
+.ventana__datos {
+  display: grid; gap: var(--espacio-2); margin: 0 0 var(--espacio-4);
+  background: var(--vainilla); border-radius: var(--radio); padding: var(--espacio-3) var(--espacio-4);
+  font-size: var(--t-s);
+}
+.ventana__datos > div { display: grid; grid-template-columns: 6rem 1fr; gap: var(--espacio-2); }
+.ventana__datos dt { font-weight: 600; }
+.ventana__datos dd { margin: 0; }
+.ventana__datos ul { margin: 0; padding-left: 1.1rem; }
+.ventana__error {
+  background: var(--alerta-clara); color: var(--alerta-oscura); border-radius: 8px;
+  padding: var(--espacio-2) var(--espacio-3); font-size: var(--t-s); margin: 0 0 var(--espacio-3);
+}
+.ventana__acciones { display: flex; justify-content: flex-end; gap: var(--espacio-2); flex-wrap: wrap; margin-top: var(--espacio-2); }
+/* Aparición: corta, desde un poco más abajo, sin escalar desde cero */
+@media (prefers-reduced-motion: no-preference) {
+  .ventana[open] { animation: ventana-entrar 0.2s cubic-bezier(0.2, 0, 0, 1); }
+  .ventana[open]::backdrop { animation: fondo-entrar 0.2s ease-out; }
+  @keyframes ventana-entrar { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes fondo-entrar { from { opacity: 0; } to { opacity: 1; } }
+}
 
 /* =================================================================
    DESPACHOS
@@ -503,19 +760,67 @@ a.cifra:hover { border-color: var(--frambuesa); }
 /* =================================================================
    CATÁLOGO — una ficha por producto, en una columna
    ================================================================= */
-.catalogo-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; max-width: 960px; }
-.ficha {
-  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 1.25rem;
-  background: var(--papel); border: 1px solid var(--borde); border-radius: var(--radio); padding: var(--espacio-4);
+.catalogo-lista {
+  list-style: none; margin: 0 auto; padding: 0;
+  display: grid; gap: 1.5rem; max-width: 820px;
 }
+/* Ficha: la foto va de fondo a la izquierda y se desvanece hacia la derecha;
+   el texto queda encima, con un halo claro suave para leerse sobre la foto. */
+.ficha {
+  position: relative;
+  overflow: hidden;
+  min-height: 290px;
+  background: var(--papel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-papel);
+  padding: var(--espacio-5) var(--espacio-5) var(--espacio-5) 26%;
+}
+.ficha__fondo {
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 58%;
+}
+.ficha__fondo .foto {
+  width: 100%; height: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+  border-radius: 0;
+}
+.ficha__fondo .foto--vacia span { font-size: 4rem; opacity: 0.6; }
+.ficha__fondo::after {        /* sombreado que funde la foto con la tarjeta */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.7) 62%,
+    var(--papel) 100%);
+}
+.ficha__cuerpo {
+  position: relative;
+  /* Halo blanco difuso: el texto resalta sobre la foto sin verse un contorno */
+  text-shadow:
+    0 0 3px rgba(255, 255, 255, 0.95),
+    0 0 8px rgba(255, 255, 255, 0.9),
+    0 0 16px rgba(255, 255, 255, 0.8);
+}
+.ficha__cuerpo .boton { text-shadow: none; }
 .ficha__cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-4); }
+.ficha__categoria { font-size: var(--t-xs); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--chocolate-suave); }
 .ficha__nombre { font-size: var(--t-l); margin: 0.1rem 0 var(--espacio-2); }
 .ficha__precio { font-family: var(--fuente-titulo); font-size: var(--t-xl); font-weight: 600; white-space: nowrap; }
+.ficha__descripcion { font-weight: 500; }
 .ficha__datos { margin: 0 0 var(--espacio-4); display: grid; gap: 0.6rem; font-size: var(--t-s); }
 .ficha__datos dt { font-weight: 600; }
-.ficha__datos dd { margin: 0; color: var(--chocolate-suave); }
+.ficha__datos dd { margin: 0; color: var(--chocolate); }
 @media (max-width: 640px) {
-  .ficha { grid-template-columns: 1fr; }
+  /* En celular la foto va arriba y se desvanece hacia abajo */
+  .ficha { padding: 170px var(--espacio-4) var(--espacio-4); }
+  .ficha__fondo { width: 100%; bottom: auto; height: 240px; }
+  .ficha__fondo::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.75) 75%, var(--papel) 100%);
+  }
 }
 
 /* ---------------- Movimiento: solo como respuesta ---------------- */

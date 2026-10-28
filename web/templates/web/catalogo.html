@@ -3,38 +3,40 @@
 
 {% block titulo %}Catálogo{% endblock %}
 
+{% block titulo_banner %}Catálogo{% endblock %}
+{% block opciones_banner %}
+  {% if categorias|length > 1 %}
+    <div class="banner__opciones">
+      <nav class="chips" aria-label="Filtrar por categoría">
+        <a class="chip" href="{% url 'catalogo' %}" {% if not categoria_actual %}aria-current="true"{% endif %}>Todos</a>
+        {% for valor, nombre in categorias %}
+          <a class="chip" href="?categoria={{ valor }}" {% if valor == categoria_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>
+        {% endfor %}
+      </nav>
+    </div>
+  {% endif %}
+{% endblock %}
+
 {% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Catálogo</h1>
-    <p>Productos disponibles para la venta, con lo que el cliente suele preguntar: ingredientes, extras, precio y tiempo de preparación.</p>
-  </div>
-</div>
-
-{% if categorias|length > 1 %}
-  <nav class="chips espacio-abajo" aria-label="Filtrar por categoría">
-    <a class="chip" href="{% url 'catalogo' %}" {% if not categoria_actual %}aria-current="true"{% endif %}>Todos</a>
-    {% for valor, nombre in categorias %}
-      <a class="chip" href="?categoria={{ valor }}" {% if valor == categoria_actual %}aria-current="true"{% endif %}>{{ nombre }}</a>
-    {% endfor %}
-  </nav>
-{% endif %}
-
 {% if productos %}
   <ul class="catalogo-lista">
     {% for producto in productos %}
       <li class="ficha" id="producto-{{ producto.pk }}">
-        {% include 'web/_imagen.html' with imagen=producto.imagen nombre=producto.nombre clase='ficha__foto' %}
+        {# La foto queda de fondo a la izquierda y se desvanece hacia el texto. #}
+        <div class="ficha__fondo" aria-hidden="true">
+          {% include 'web/_imagen.html' with imagen=producto.imagen nombre=producto.nombre %}
+        </div>
+
         <div class="ficha__cuerpo">
           <div class="ficha__cabecera">
             <div>
-              <span class="nota">{{ producto.get_categoria_display }}</span>
+              <span class="ficha__categoria">{{ producto.get_categoria_display }}</span>
               <h2 class="ficha__nombre">{{ producto.nombre }}</h2>
             </div>
             <div class="ficha__precio">{{ producto.precio_base|clp }}</div>
           </div>
 
-          {% if producto.descripcion %}<p>{{ producto.descripcion }}</p>{% endif %}
+          {% if producto.descripcion %}<p class="ficha__descripcion">{{ producto.descripcion }}</p>{% endif %}
 
           <dl class="ficha__datos">
             <div>

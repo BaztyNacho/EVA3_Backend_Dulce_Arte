@@ -3,41 +3,42 @@
 
 {% block titulo %}Bodega{% endblock %}
 
-{% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Bodega</h1>
-    <p>El stock baja solo al confirmar pedidos. Aquí registras compras, mermas y correcciones.</p>
+{% block titulo_banner %}Bodega{% endblock %}
+{% block subtitulo_banner %}El stock baja solo al confirmar pedidos. Aquí registras compras, mermas y correcciones.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <nav class="chips" aria-label="Filtrar insumos">
+      <a class="chip" href="{% url 'bodega' %}" {% if not solo_bajo %}aria-current="true"{% endif %}>Todos</a>
+      <a class="chip" href="{% url 'bodega' %}?stock=bajo" {% if solo_bajo %}aria-current="true"{% endif %}>Stock bajo ({{ total_bajo }})</a>
+    </nav>
   </div>
-</div>
+{% endblock %}
 
-<nav class="chips espacio-abajo" aria-label="Filtrar insumos">
-  <a class="chip" href="{% url 'bodega' %}" {% if not solo_bajo %}aria-current="true"{% endif %}>Todos</a>
-  <a class="chip" href="{% url 'bodega' %}?stock=bajo" {% if solo_bajo %}aria-current="true"{% endif %}>Stock bajo ({{ total_bajo }})</a>
-</nav>
-
+{% block contenido %}
 <div class="grilla-2">
-  <section class="panel" aria-labelledby="t-insumos">
+  {# Vitrina: una tarjeta por insumo con nombre, foto, cantidad y botón Añadir #}
+  <section class="vitrina" aria-labelledby="t-insumos">
     <h2 id="t-insumos" class="oculto-visual">Insumos</h2>
     {% if insumos %}
-      <ul class="insumos">
+      <ul class="insumos-grilla">
         {% for insumo in insumos %}
-          <li class="insumo{% if insumo.stock_bajo %} insumo--bajo{% endif %}">
-            <div class="insumo__fila">
-              <span class="insumo__nombre">{{ insumo.nombre }}</span>
-              <span class="insumo__cantidad">
-                {{ insumo.stock_actual|floatformat:"-3" }} {{ insumo.unidad }}
-              </span>
-            </div>
-            <div class="medidor" role="img"
-                 aria-label="Stock de {{ insumo.nombre }}: {{ insumo.stock_actual|floatformat:'-3' }} {{ insumo.unidad }}, mínimo {{ insumo.stock_minimo|floatformat:'-3' }}">
-              <span class="medidor__relleno" style="width: {{ insumo.porcentaje_barra }}%"></span>
-              <span class="medidor__minimo" style="left: {{ insumo.porcentaje_minimo }}%"></span>
-            </div>
-            <div class="insumo__fila nota">
-              <span>Mínimo: {{ insumo.stock_minimo|floatformat:"-3" }} {{ insumo.unidad }}</span>
-              {% if insumo.stock_bajo %}<span class="error-campo">Reponer</span>{% endif %}
-            </div>
+          <li class="tarjeta-insumo{% if insumo.stock_bajo %} tarjeta-insumo--bajo{% endif %}" id="insumo-{{ insumo.pk }}">
+            <h3 class="tarjeta-insumo__nombre">{{ insumo.nombre }}</h3>
+            {% include 'web/_imagen.html' with imagen=insumo.imagen nombre=insumo.nombre clase='tarjeta-insumo__foto' %}
+            <p class="tarjeta-insumo__cantidad">
+              Cantidad: <strong>{{ insumo.stock_actual|floatformat:"-3" }} {{ insumo.unidad }}</strong>
+            </p>
+            <p class="tarjeta-insumo__minimo">
+              Mínimo: {{ insumo.stock_minimo|floatformat:"-3" }} {{ insumo.unidad }}
+              {% if insumo.stock_bajo %}<span class="etiqueta-reponer">Reponer</span>{% endif %}
+            </p>
+            <button class="boton boton--chico ancho-completo" type="button"
+                    data-abrir-movimiento
+                    data-insumo="{{ insumo.pk }}"
+                    data-nombre="{{ insumo.nombre }}"
+                    data-unidad="{{ insumo.unidad }}"
+                    data-stock="{{ insumo.stock_actual|floatformat:'-3' }}"
+                    aria-label="Añadir movimiento de {{ insumo.nombre }}">Añadir</button>
           </li>
         {% endfor %}
       </ul>
@@ -49,6 +50,7 @@
   </section>
 
   <aside>
+    {# Acceso rápido: registrar un movimiento eligiendo el insumo de la lista #}
     <form class="panel espacio-abajo" id="form-movimiento" novalidate>
       <h2>Registrar movimiento</h2>
       <div class="campo">
@@ -93,6 +95,34 @@
     </section>
   </aside>
 </div>
+
+{# Ventana que abre el botón "Añadir" de cada tarjeta #}
+<dialog class="ventana" id="ventana-movimiento" aria-labelledby="vm-titulo">
+  <form id="form-ventana" novalidate>
+    <h2 id="vm-titulo">Registrar movimiento</h2>
+    <p class="ventana__detalle" id="vm-detalle"></p>
+    <div class="campo">
+      <label for="vm-tipo">Tipo</label>
+      <select id="vm-tipo">
+        <option value="entrada">Entrada: compra o reposición</option>
+        <option value="ajuste">Ajuste: merma o pérdida</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label for="vm-cantidad">Cantidad (<span id="vm-unidad"></span>)</label>
+      <input type="number" id="vm-cantidad" min="0.001" step="0.001" inputmode="decimal" required>
+    </div>
+    <div class="campo">
+      <label for="vm-motivo">Motivo</label>
+      <input type="text" id="vm-motivo" maxlength="200" placeholder="Ej.: compra a proveedor">
+    </div>
+    <p class="ventana__error" id="vm-error" role="alert" hidden></p>
+    <div class="ventana__acciones">
+      <button class="boton boton--secundario" type="button" data-cerrar>Cancelar</button>
+      <button class="boton" type="submit">Registrar</button>
+    </div>
+  </form>
+</dialog>
 {% endblock %}
 
 {% block scripts %}

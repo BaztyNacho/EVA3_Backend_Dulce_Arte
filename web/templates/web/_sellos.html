@@ -1,0 +1,67 @@
+{% comment %}
+  Sellos de estado (dibujos SVG). Se cargan una sola vez en base.html y cada sello
+  se reutiliza con <use href="#sello-ESTADO">. El círculo y la figura usan el color
+  del texto (currentColor), que define el CSS con las clases .sello--ESTADO.
+{% endcomment %}
+<svg xmlns="http://www.w3.org/2000/svg" class="oculto-visual" aria-hidden="true" focusable="false">
+  {# Recibido: ticket #}
+  <symbol id="sello-recibido" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <path d="M29 52 L44 67 L72 35"/>
+  </symbol>
+  {# En preparación: cuchara y cuchillo cruzados #}
+  <symbol id="sello-en_preparacion" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <path d="M31 72 L55 46"/>
+    <ellipse cx="62" cy="38" rx="8" ry="12" transform="rotate(42 62 38)" fill="currentColor"/>
+    <path d="M70 72 L60 61" stroke-width="9"/>
+    <path d="M60 61 L33 31 Q31 27 36 29 L63 56 Z" fill="currentColor" stroke-width="4"/>
+  </symbol>
+  {# Horneado/Decorado: olla con vapor #}
+  <symbol id="sello-horneado_decorado" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <path d="M30 50 H70 V66 Q70 74 62 74 H38 Q30 74 30 66 Z" fill="currentColor"/>
+    <path d="M25 50 H75 M22 56 H30 M70 56 H78"/>
+    <path d="M40 40 Q36 35 40 30 Q44 25 40 20 M50 40 Q46 35 50 30 Q54 25 50 20 M60 40 Q56 35 60 30 Q64 25 60 20" stroke-width="4"/>
+  </symbol>
+  {# Control de calidad: lupa #}
+  <symbol id="sello-control_calidad" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <circle cx="45" cy="44" r="15"/>
+    <path d="M56 55 L71 70" stroke-width="9"/>
+  </symbol>
+  {# Listo: pulgar arriba #}
+  <symbol id="sello-listo" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <rect x="25" y="47" width="10" height="26" rx="2" fill="currentColor"/>
+    <path d="M40 47 L49 31 Q52 24 57 27 Q60 30 58 37 L56 45 H70 Q77 45 75 52 L71 68 Q69 73 64 73 H40 Z" fill="currentColor" stroke-width="3"/>
+  </symbol>
+  {# Cotización: lápiz #}
+  <symbol id="sello-cotizacion" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <path d="M29 71 L33 57 L59 31 Q62 28 65 31 L69 35 Q72 38 69 41 L43 67 Z" fill="currentColor" stroke-width="4"/>
+    <path d="M55 35 L65 45" stroke="#FFFFFF" stroke-width="3"/>
+  </symbol>
+  {# En despacho: camión #}
+  <symbol id="sello-en_despacho" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <path d="M20 37 H55 V63 H20 Z" fill="currentColor" stroke-width="4"/>
+    <path d="M55 45 H67 L77 55 V63 H55 Z" fill="currentColor" stroke-width="4"/>
+    <path d="M60 49 H66 L71 54 H60 Z" fill="#FFFFFF" stroke="none"/>
+    <circle cx="32" cy="66" r="6" fill="#FFFFFF" stroke-width="4"/>
+    <circle cx="66" cy="66" r="6" fill="#FFFFFF" stroke-width="4"/>
+  </symbol>
+  {# Entregado: regalo #}
+  <symbol id="sello-entregado" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <rect x="29" y="49" width="42" height="24" rx="2"/>
+    <rect x="25" y="40" width="50" height="10" rx="2"/>
+    <path d="M50 40 V73"/>
+    <path d="M50 40 Q41 27 35 32 Q31 38 50 40 Q59 27 65 32 Q69 38 50 40" stroke-width="4"/>
+  </symbol>
+  {# Cancelado: X #}
+  <symbol id="sello-cancelado" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44"/>
+    <path d="M34 34 L66 66 M66 34 L34 66" stroke-width="8"/>
+  </symbol>
+</svg>

@@ -5,15 +5,15 @@
 
 {% block clase_pagina %}pagina--ancha{% endblock %}
 
-{% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Cocina</h1>
-    <p>Arrastra cada comanda a la columna siguiente cuando termine una etapa, o usa su botón. El tablero se actualiza solo cada minuto.</p>
+{% block titulo_banner %}Cocina{% endblock %}
+{% block subtitulo_banner %}Arrastra cada comanda a la siguiente etapa o usa su botón. El tablero se actualiza solo cada minuto.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <button class="boton boton--secundario" type="button" id="actualizar">Actualizar ahora</button>
   </div>
-  <button class="boton boton--secundario" type="button" id="actualizar">Actualizar ahora</button>
-</div>
+{% endblock %}
 
+{% block contenido %}
 <div class="tablero" id="tablero" aria-busy="true">
   {% for estado, titulo in columnas %}
     <section class="columna" aria-labelledby="col-{{ estado }}">
@@ -25,6 +25,33 @@
     </section>
   {% endfor %}
 </div>
+
+{# Ventana para confirmar cada cambio de etapa (al arrastrar o con los botones) #}
+<dialog class="ventana" id="ventana-confirmar" aria-labelledby="vc-titulo" aria-describedby="vc-explicacion">
+  <form id="form-confirmar" novalidate>
+    <h2 id="vc-titulo">¿Confirmar cambio de etapa?</h2>
+    <div class="ventana__etapas">
+      <span class="estado" id="vc-desde"></span>
+      <span aria-hidden="true">→</span>
+      <span class="estado" id="vc-hacia"></span>
+    </div>
+    <p class="ventana__detalle" id="vc-explicacion"></p>
+    <dl class="ventana__datos">
+      <div><dt>Pedido</dt><dd id="vc-pedido"></dd></div>
+      <div><dt>Cliente</dt><dd id="vc-cliente"></dd></div>
+      <div><dt>Entrega</dt><dd id="vc-entrega"></dd></div>
+      <div><dt>Productos</dt><dd><ul id="vc-productos"></ul></dd></div>
+    </dl>
+    <div class="campo" id="vc-campo-motivo" hidden>
+      <label for="vc-motivo">¿Qué hay que corregir?</label>
+      <input type="text" id="vc-motivo" maxlength="200" placeholder="Ej.: decoración dispareja">
+    </div>
+    <div class="ventana__acciones">
+      <button class="boton boton--secundario" type="button" data-cerrar>Cancelar</button>
+      <button class="boton" type="submit" id="vc-confirmar">Confirmar</button>
+    </div>
+  </form>
+</dialog>
 {% endblock %}
 
 {% block scripts %}

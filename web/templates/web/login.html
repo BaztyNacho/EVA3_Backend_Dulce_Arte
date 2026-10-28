@@ -1,13 +1,14 @@
 {% extends 'web/base.html' %}
+{% load static %}
 
 {% block titulo %}Ingresar{% endblock %}
 
 {% block cuerpo %}
 <main class="acceso">
-  <form class="comanda" method="post" novalidate>
+  <form class="comanda acceso__tarjeta" method="post" novalidate>
     {% csrf_token %}
-    <h1>Dulce Arte</h1>
-    <p>Ingresa con tu usuario para gestionar pedidos, cocina y despachos.</p>
+    <img class="acceso__logo" src="{% static 'web/img/logo-dulce-arte.png' %}" alt="Dulce Arte, repostería">
+    <h1 class="oculto-visual">Ingresar a Dulce Arte</h1>
 
     {% if form.non_field_errors %}
       <div class="mensaje mensaje--error" role="alert">

@@ -3,18 +3,19 @@
 
 {% block titulo %}Pedido #{{ pedido.pk }}{% endblock %}
 
-{% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Pedido #{{ pedido.pk }}</h1>
-    <p>Registrado el {{ pedido.creado_en|date:"j \d\e F, H:i" }}{% if pedido.creado_por %} por {{ pedido.creado_por.username }}{% endif %}.</p>
+{% block titulo_banner %}Pedido #{{ pedido.pk }}{% endblock %}
+{% block subtitulo_banner %}Registrado el {{ pedido.creado_en|date:"j \d\e F, H:i" }}{% if pedido.creado_por %} por {{ pedido.creado_por.username }}{% endif %}.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <a class="boton boton--secundario" href="{% url 'pedidos_lista' %}">Volver a pedidos</a>
   </div>
-  <a class="boton boton--secundario" href="{% url 'pedidos_lista' %}">Volver a pedidos</a>
-</div>
+{% endblock %}
 
+{% block contenido %}
 <div class="grilla-2">
   <div>
     <article class="comanda espacio-abajo">
+      {% include 'web/_sello.html' with estado=pedido.estado %}
       <div class="comanda__cabecera">
         <span class="comanda__numero">Entrega</span>
         <span class="estado estado--{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>

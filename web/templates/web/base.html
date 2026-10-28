@@ -12,34 +12,61 @@
 </head>
 <body>
   {% block cuerpo %}
+  {% include 'web/_sellos.html' %}
+  {# Barra superior: enlaces a ambos lados y el logo al centro. Abajo, el borde de "cortina". #}
   <header class="barra">
-    <div class="barra__contenido">
-      <a class="marca" href="{% url 'inicio' %}">Dulce Arte</a>
-      <nav class="nav" aria-label="Principal">
-        {% with ruta=request.resolver_match.url_name %}
+    {% with ruta=request.resolver_match.url_name %}
+    <nav class="barra__contenido" aria-label="Principal">
+      <div class="nav nav--izquierda">
         <a href="{% url 'inicio' %}" {% if ruta == 'inicio' %}aria-current="page"{% endif %}>Inicio</a>
         {% if es_ventas %}
           <a href="{% url 'catalogo' %}" {% if ruta == 'catalogo' %}aria-current="page"{% endif %}>Catálogo</a>
+        {% else %}
+          <a href="{% url 'pedidos_lista' %}" {% if ruta == 'pedidos_lista' or ruta == 'pedido_detalle' %}aria-current="page"{% endif %}>Pedidos</a>
+          <a href="{% url 'pedido_nuevo' %}" {% if ruta == 'pedido_nuevo' %}aria-current="page"{% endif %}>Nueva cotización</a>
         {% endif %}
-        <a href="{% url 'pedidos_lista' %}" {% if ruta == 'pedidos_lista' or ruta == 'pedido_detalle' %}aria-current="page"{% endif %}>Pedidos</a>
-        <a href="{% url 'pedido_nuevo' %}" {% if ruta == 'pedido_nuevo' %}aria-current="page"{% endif %}>Nueva cotización</a>
-        {% if es_admin %}
-          <a href="{% url 'kanban' %}" {% if ruta == 'kanban' %}aria-current="page"{% endif %}>Cocina</a>
-          <a href="{% url 'bodega' %}" {% if ruta == 'bodega' %}aria-current="page"{% endif %}>Bodega</a>
-          <a href="{% url 'despachos' %}" {% if ruta == 'despachos' or ruta == 'despacho_entrega' %}aria-current="page"{% endif %}>Despachos</a>
-          <a href="{% url 'admin:index' %}">Administración</a>
-        {% endif %}
-        {% endwith %}
-      </nav>
-      <div class="usuario">
-        <span>{{ user.get_full_name|default:user.username }}<br><small>{% if es_admin %}Administrador{% elif es_ventas %}Atención y Ventas{% endif %}</small></span>
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit">Cerrar sesión</button>
-        </form>
       </div>
-    </div>
+
+      <a class="marca" href="{% url 'inicio' %}">
+        <img src="{% static 'web/img/logo-dulce-arte.png' %}" alt="Dulce Arte, ir al inicio">
+      </a>
+
+      <div class="barra__derecha">
+        <div class="nav">
+          {% if es_ventas %}
+            <a href="{% url 'pedidos_lista' %}" {% if ruta == 'pedidos_lista' or ruta == 'pedido_detalle' %}aria-current="page"{% endif %}>Pedidos</a>
+            <a href="{% url 'pedido_nuevo' %}" {% if ruta == 'pedido_nuevo' %}aria-current="page"{% endif %}>Nueva cotización</a>
+          {% endif %}
+          {% if es_admin %}
+            <a href="{% url 'kanban' %}" {% if ruta == 'kanban' %}aria-current="page"{% endif %}>Cocina</a>
+            <a href="{% url 'bodega' %}" {% if ruta == 'bodega' %}aria-current="page"{% endif %}>Bodega</a>
+            <a href="{% url 'despachos' %}" {% if ruta == 'despachos' or ruta == 'despacho_entrega' %}aria-current="page"{% endif %}>Despachos</a>
+            <a href="{% url 'admin:index' %}">Administración</a>
+          {% endif %}
+        </div>
+        <div class="usuario">
+          <span>{{ user.get_full_name|default:user.username }} <small>{% if es_admin %}Administrador{% elif es_ventas %}Atención y Ventas{% endif %}</small></span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit">Cerrar sesión</button>
+          </form>
+        </div>
+      </div>
+    </nav>
+    {% endwith %}
   </header>
+
+  {% comment %}
+    Banner con el título de la página. Cada pantalla define:
+    titulo_banner (obligatorio), subtitulo_banner y opciones_banner (filtros o botones).
+  {% endcomment %}
+  {% block banner %}
+  <section class="banner">
+    <h1 class="banner__titulo">{% block titulo_banner %}{% endblock %}</h1>
+    <p class="banner__subtitulo">{% block subtitulo_banner %}{% endblock %}</p>
+    {% block opciones_banner %}{% endblock %}
+  </section>
+  {% endblock %}
 
   <main class="pagina {% block clase_pagina %}{% endblock %}" id="contenido">
     {% if messages %}

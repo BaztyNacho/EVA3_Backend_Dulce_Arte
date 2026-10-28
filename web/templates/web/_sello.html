@@ -1,0 +1,4 @@
+{# Sello decorativo de una comanda o parada. Recibe "estado" (ej.: recibido, entregado). #}
+<span class="comanda__sello sello--{{ estado }}" aria-hidden="true">
+  <svg viewBox="0 0 100 100"><use href="#sello-{{ estado }}"/></svg>
+</span>

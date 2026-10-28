@@ -2,6 +2,7 @@
 {# Comanda: ticket de pedido reutilizable. Recibe "pedido" y "limite_urgente". #}
 <a class="comanda{% if pedido.fecha_entrega <= limite_urgente and pedido.estado != 'entregado' and pedido.estado != 'cancelado' %} comanda--urgente{% endif %}"
    href="{% url 'pedido_detalle' pedido.pk %}">
+  {% include 'web/_sello.html' with estado=pedido.estado %}
   <div class="comanda__cabecera">
     <span class="comanda__numero">Pedido #{{ pedido.pk }}</span>
     <span class="estado estado--{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>

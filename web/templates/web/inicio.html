@@ -2,15 +2,15 @@
 
 {% block titulo %}Inicio{% endblock %}
 
-{% block contenido %}
-<div class="encabezado">
-  <div>
-    <h1>Hola, {{ user.first_name|default:user.username }}</h1>
-    <p>{% now "l j \d\e F" %}. Esto es lo que está pasando en la pastelería.</p>
+{% block titulo_banner %}Hola, {{ user.first_name|default:user.username }}{% endblock %}
+{% block subtitulo_banner %}{% now "l j \d\e F" %}. Esto es lo que está pasando en la pastelería.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <a class="boton" href="{% url 'pedido_nuevo' %}">Crear cotización</a>
   </div>
-  <a class="boton" href="{% url 'pedido_nuevo' %}">Crear cotización</a>
-</div>
+{% endblock %}
 
+{% block contenido %}
 <section class="resumen-dia" aria-label="Resumen del día">
   <a class="cifra" href="{% url 'pedidos_lista' %}?estado=cotizacion">
     <strong>{{ cotizaciones }}</strong><span>cotizaciones por confirmar</span>
