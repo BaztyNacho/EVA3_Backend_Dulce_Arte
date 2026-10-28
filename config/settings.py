@@ -34,6 +34,14 @@ X_FRAME_OPTIONS = 'DENY'
 # La sesión expira tras 8 horas (una jornada de trabajo).
 SESSION_COOKIE_AGE = 60 * 60 * 8
 
+# HTTPS (solo en el servidor, con dominio y certificado de Let's Encrypt).
+# Nginx atiende HTTPS y le avisa a Django con la cabecera X-Forwarded-Proto.
+USAR_HTTPS = env.bool('USAR_HTTPS', default=False)
+if USAR_HTTPS:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True   # la cookie de sesión solo viaja cifrada
+    CSRF_COOKIE_SECURE = True      # la cookie CSRF solo viaja cifrada
+
 
 # ---------------------------------------------------------------
 # Aplicaciones instaladas
