@@ -6,15 +6,16 @@
 {% block clase_pagina %}pagina--ancha{% endblock %}
 
 {% block titulo_banner %}Cocina{% endblock %}
-{% block subtitulo_banner %}Arrastra cada comanda a la siguiente etapa o usa su botón. El tablero se actualiza solo cada minuto.{% endblock %}
+{% block subtitulo_banner %}{% if solo_lectura %}Vista de supervisión: puedes ver cómo avanza cada pedido. Las etapas las mueve Cocina.{% else %}Arrastra cada comanda a la siguiente etapa o usa su botón. El tablero se actualiza solo cada minuto.{% endif %}{% endblock %}
 {% block opciones_banner %}
   <div class="banner__opciones">
     <button class="boton boton--secundario" type="button" id="actualizar">Actualizar ahora</button>
+    <a class="boton boton--secundario" href="{% url 'produccion_manana' %}">Producción de mañana</a>
   </div>
 {% endblock %}
 
 {% block contenido %}
-<div class="tablero" id="tablero" aria-busy="true">
+<div class="tablero{% if solo_lectura %} tablero--solo-lectura{% endif %}" id="tablero" aria-busy="true" data-solo-lectura="{{ solo_lectura|yesno:'true,false' }}">
   {% for estado, titulo in columnas %}
     <section class="columna" aria-labelledby="col-{{ estado }}">
       <header class="columna__cabecera">

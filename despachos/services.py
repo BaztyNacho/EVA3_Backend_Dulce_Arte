@@ -9,7 +9,7 @@ from django.utils import timezone
 from pedidos.models import Pedido
 from pedidos.services import ReglaNegocioError, registrar_cambio
 
-from .models import Despacho
+from .models import Despacho, Ruta
 
 
 def marcar_pedido_entregado(despacho, usuario):
@@ -51,4 +51,10 @@ def confirmar_entrega(despacho, usuario, nombre_receptor, firma=None, comprobant
 
     despacho.save()
     marcar_pedido_entregado(despacho, usuario)
+
+    # Si se entrega una parada de una ruta que aún no se había iniciado, la ruta pasa a "En curso".
+    ruta = despacho.ruta
+    if ruta and ruta.estado == Ruta.Estado.PLANIFICADA:
+        ruta.estado = Ruta.Estado.EN_CURSO
+        ruta.save(update_fields=['estado'])
     return despacho

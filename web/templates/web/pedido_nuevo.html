@@ -5,11 +5,18 @@
 {% block titulo_banner %}Nueva cotización{% endblock %}
 {% block subtitulo_banner %}Registra lo que pide el cliente. El pedido se envía a cocina cuando confirmes la cotización.{% endblock %}
 
+{% block clase_pagina %}pagina--ancha{% endblock %}
+
 {% block contenido %}
-<form id="cotizador" class="grilla-2" novalidate>
-  <div>
+{# Tres columnas: datos del cliente | catálogo disponible | recibo #}
+<form id="cotizador" class="cotizador" novalidate>
+
+  {# ---------- 1. Datos del cliente: cliente, entrega y diseño ---------- #}
+  <div class="cotizador__datos">
+    <h2 class="cotizador__titulo">Datos del cliente</h2>
+
     <section class="panel espacio-abajo" aria-labelledby="t-cliente">
-      <h2 id="t-cliente">Cliente</h2>
+      <h3 id="t-cliente">Cliente</h3>
 
       <div id="cliente-elegido" class="cliente-elegido" hidden>
         <span id="cliente-elegido-texto"></span>
@@ -38,20 +45,18 @@
     </section>
 
     <section class="panel espacio-abajo" aria-labelledby="t-entrega">
-      <h2 id="t-entrega">Entrega</h2>
-      <div class="fila">
-        <div class="campo">
-          <label for="fecha-entrega">Fecha y hora</label>
-          <input type="datetime-local" id="fecha-entrega" min="{{ fecha_minima }}" required>
-          <small>Con al menos 24 horas de anticipación.</small>
-          <span class="error-campo" data-error="fecha_entrega"></span>
-        </div>
-        <div class="campo">
-          <span class="etiqueta">Tipo de entrega</span>
-          <div class="opciones-radio">
-            <label><input type="radio" name="tipo_entrega" value="retiro" checked><span>Retiro en tienda</span></label>
-            <label><input type="radio" name="tipo_entrega" value="despacho"><span>Despacho a domicilio</span></label>
-          </div>
+      <h3 id="t-entrega">Entrega</h3>
+      <div class="campo">
+        <label for="fecha-entrega">Fecha y hora</label>
+        <input type="datetime-local" id="fecha-entrega" min="{{ fecha_minima }}" required>
+        <small>Con al menos 24 horas de anticipación.</small>
+        <span class="error-campo" data-error="fecha_entrega"></span>
+      </div>
+      <div class="campo">
+        <span class="etiqueta">Tipo de entrega</span>
+        <div class="opciones-radio">
+          <label><input type="radio" name="tipo_entrega" value="retiro" checked><span>Retiro en tienda</span></label>
+          <label><input type="radio" name="tipo_entrega" value="despacho"><span>Despacho a domicilio</span></label>
         </div>
       </div>
       <div class="campo" id="campo-direccion" hidden>
@@ -61,16 +66,8 @@
       </div>
     </section>
 
-    <section class="panel espacio-abajo" aria-labelledby="t-productos">
-      <h2 id="t-productos">Productos</h2>
-      <p class="nota">Toca un producto para agregarlo. Luego ajusta la cantidad y los extras.</p>
-      <div id="catalogo" class="catalogo"></div>
-      <div id="lineas" class="espacio-arriba"></div>
-      <p class="error-campo" data-error="detalles"></p>
-    </section>
-
     <section class="panel" aria-labelledby="t-diseno">
-      <h2 id="t-diseno">Diseño</h2>
+      <h3 id="t-diseno">Diseño</h3>
       <div class="campo">
         <label for="diseno">Descripción del diseño</label>
         <textarea id="diseno" placeholder="Colores, decoración, mensaje sobre la torta…"></textarea>
@@ -86,18 +83,39 @@
     </section>
   </div>
 
-  <aside class="resumen" aria-labelledby="t-resumen">
-    <div class="comanda">
-      <h2 id="t-resumen" class="resumen__titulo">Resumen</h2>
-      <ul class="comanda__lineas" id="resumen-lineas">
-        <li><span class="nota">Aún no agregas productos.</span></li>
-      </ul>
-      <div class="comanda__pie">
-        <span>Total estimado</span>
-        <span class="resumen__total" id="resumen-total">$0</span>
+  {# ---------- 2. Catálogo disponible y productos agregados ---------- #}
+  <div class="cotizador__catalogo">
+    <h2 class="cotizador__titulo">Catálogo disponible</h2>
+
+    <section class="panel espacio-abajo" aria-labelledby="t-productos">
+      <h3 id="t-productos">Productos</h3>
+      <p class="nota">Toca un producto para agregarlo. Luego ajusta la cantidad y los extras más abajo.</p>
+      <div id="catalogo" class="catalogo"></div>
+      <p class="error-campo" data-error="detalles"></p>
+    </section>
+
+    <section class="panel" id="panel-lineas" aria-labelledby="t-agregados" hidden>
+      <h3 id="t-agregados">Productos agregados</h3>
+      <div id="lineas"></div>
+    </section>
+  </div>
+
+  {# ---------- 3. Recibo ---------- #}
+  <aside class="cotizador__recibo" aria-labelledby="t-recibo">
+    <h2 class="cotizador__titulo" id="t-recibo">Recibo</h2>
+    <div class="resumen">
+      <div class="comanda">
+        <h3 class="resumen__titulo">Resumen</h3>
+        <ul class="comanda__lineas" id="resumen-lineas">
+          <li><span class="nota">Aún no agregas productos.</span></li>
+        </ul>
+        <div class="comanda__pie">
+          <span>Total estimado</span>
+          <span class="resumen__total" id="resumen-total">$0</span>
+        </div>
+        <p class="nota espacio-arriba-chico">El sistema recalcula el total al guardar.</p>
+        <button class="boton boton--grande" type="submit" id="guardar">Guardar cotización</button>
       </div>
-      <p class="nota espacio-arriba-chico">El sistema recalcula el total al guardar.</p>
-      <button class="boton boton--grande" type="submit" id="guardar">Guardar cotización</button>
     </div>
   </aside>
 </form>

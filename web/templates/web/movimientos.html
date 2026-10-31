@@ -1,0 +1,61 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Movimientos de bodega{% endblock %}
+
+{% block titulo_banner %}Movimientos{% endblock %}
+{% block subtitulo_banner %}Historial de entradas, mermas, consumos por pedido y devoluciones.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <nav class="chips" aria-label="Filtrar por período">
+      {% for valor, nombre in periodos %}
+        <a class="chip" href="?periodo={{ valor }}&tipo={{ tipo }}" {% if valor == periodo %}aria-current="true"{% endif %}>{{ nombre }}</a>
+      {% endfor %}
+    </nav>
+    <a class="boton" href="{% url 'bodega' %}">Ir al inventario</a>
+  </div>
+{% endblock %}
+
+{% block contenido %}
+<nav class="chips chips--centrados espacio-abajo" aria-label="Filtrar por tipo">
+  {% for valor, nombre in filtros_tipo %}
+    <a class="chip" href="?tipo={{ valor }}&periodo={{ periodo }}" {% if valor == tipo %}aria-current="true"{% endif %}>{{ nombre }}</a>
+  {% endfor %}
+</nav>
+
+{% if pagina.object_list %}
+  <div class="panel tabla-contenedor">
+    <table class="tabla">
+      <caption class="oculto-visual">Movimientos de bodega</caption>
+      <thead>
+        <tr><th scope="col">Fecha</th><th scope="col">Insumo</th><th scope="col">Tipo</th><th scope="col" class="tabla__numero">Cantidad</th><th scope="col">Motivo</th><th scope="col">Usuario</th></tr>
+      </thead>
+      <tbody>
+        {% for mov in pagina.object_list %}
+          <tr>
+            <td>{{ mov.fecha|date:"j M, H:i" }}</td>
+            <td><strong>{{ mov.insumo.nombre }}</strong></td>
+            <td><span class="tipo-mov tipo-mov--{{ mov.tipo }}">{{ mov.get_tipo_display }}</span></td>
+            <td class="tabla__numero{% if mov.tipo == 'entrada' or mov.tipo == 'devolucion' %} tabla__numero--mas{% else %} tabla__numero--menos{% endif %}">
+              {% if mov.tipo == 'entrada' or mov.tipo == 'devolucion' %}+{% else %}−{% endif %}{{ mov.cantidad|floatformat:"-3" }} {{ mov.insumo.unidad }}
+            </td>
+            <td>{{ mov.motivo|default:"—" }}{% if mov.pedido_id and not mov.motivo %} <span class="nota">(pedido #{{ mov.pedido_id }})</span>{% endif %}</td>
+            <td class="nota">{{ mov.usuario.username|default:"—" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pagina.paginator.num_pages > 1 %}
+    <nav class="paginacion" aria-label="Páginas">
+      {% if pagina.has_previous %}<a class="boton boton--secundario" href="?tipo={{ tipo }}&periodo={{ periodo }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+      <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+      {% if pagina.has_next %}<a class="boton boton--secundario" href="?tipo={{ tipo }}&periodo={{ periodo }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+    </nav>
+  {% endif %}
+{% else %}
+  <div class="panel vacio">
+    <p>No hay movimientos con estos filtros.</p>
+    <a class="boton boton--secundario" href="?periodo=todo">Ver todos los movimientos</a>
+  </div>
+{% endif %}
+{% endblock %}

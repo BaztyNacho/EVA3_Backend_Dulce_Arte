@@ -38,6 +38,9 @@ function crearSello(estado) {
   return sello;
 }
 
+// El Administrador ve el tablero en modo lectura: sin botones ni arrastrar
+const SOLO_LECTURA = document.getElementById('tablero').dataset.soloLectura === 'true';
+
 const pedidos = new Map();   // id -> datos del pedido (para la ventana de confirmación)
 let arrastrando = false;
 
@@ -118,7 +121,7 @@ ventana.querySelector('[data-cerrar]').addEventListener('click', () => cerrarVen
 // Escape: el navegador cierra el <dialog>; lo tratamos como "Cancelar"
 ventana.addEventListener('cancel', (evento) => { evento.preventDefault(); cerrarVentana(false); });
 // Clic en el fondo oscuro (fuera de la ventana) también cancela
-ventana.addEventListener('click', (evento) => { if (evento.target === ventana) cerrarVentana(false); });
+ventana.addEventListener('click', (evento) => { if (esClicFuera(evento, ventana)) cerrarVentana(false); });
 
 /* ---------------- Tarjetas ---------------- */
 function crearTarjeta(pedido) {
@@ -191,7 +194,11 @@ function crearTarjeta(pedido) {
     acciones.append(rechazar);
   }
 
-  tarjeta.append(crearSello(pedido.estado), cabecera, hora, dia, cliente, lineas, acciones);
+  if (SOLO_LECTURA) {
+    tarjeta.append(crearSello(pedido.estado), cabecera, hora, dia, cliente, lineas);
+  } else {
+    tarjeta.append(crearSello(pedido.estado), cabecera, hora, dia, cliente, lineas, acciones);
+  }
   return tarjeta;
 }
 
@@ -262,6 +269,7 @@ function devolverTarjeta(evento) {
 }
 
 document.querySelectorAll('.columna__lista').forEach((lista) => {
+  if (SOLO_LECTURA) return;   // sin arrastrar en modo lectura
   new Sortable(lista, {
     group: {
       name: 'cocina',
@@ -295,7 +303,17 @@ document.querySelectorAll('.columna__lista').forEach((lista) => {
   });
 });
 
+/* Si se llega con ?etapa=control_calidad (desde Inicio), se destaca esa columna */
+function destacarEtapa() {
+  const etapa = new URLSearchParams(window.location.search).get('etapa');
+  const lista = etapa && document.querySelector(`.columna__lista[data-estado="${etapa}"]`);
+  if (!lista) return;
+  const columna = lista.closest('.columna');
+  columna.classList.add('columna--destacada');
+  columna.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
 document.getElementById('actualizar').addEventListener('click', cargar);
 // Recarga automática cada minuto, salvo mientras se arrastra o se está confirmando
 setInterval(() => { if (!arrastrando && !ventana.open) cargar(); }, 60000);
-cargar();
+cargar().then(destacarEtapa);

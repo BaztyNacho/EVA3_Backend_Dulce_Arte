@@ -170,6 +170,40 @@ Este documento registra cómo se usó la IA durante el desarrollo: qué se le pi
 - **Verificación:** se ejecutó el comando dos veces; la primera asignó las 11 fotos y la segunda no duplicó nada. El catálogo mostró todas las fotos sin errores.
 - **Mi decisión:** las fotos de los productos son **imágenes generadas con IA**, usadas como referencia porque el proyecto es académico y la pastelería no es real.
 
+### 3.12 Rediseño visual por capturas
+
+**Forma de trabajo:** envié capturas editadas de cómo quería cada pantalla y describí los cambios con mis palabras; la IA los aplicó, los probó con Playwright y me mostró capturas del resultado antes de entregarme los archivos.
+- **Login:** fondo propio y el logo de Dulce Arte sobresaliendo de la tarjeta.
+- **Barra superior:** logo al centro, enlaces a ambos lados y borde de círculos tipo cortina.
+- **Banner** con imagen propia en todas las pantallas: título en blanco, filtros y botones centrados en el borde, y un difuminado crema que lo separa de la barra.
+- **Catálogo:** foto del producto de fondo, desvanecida, con el texto encima.
+- **Bodega:** tarjetas con foto, cantidad y botón "Añadir" que abre una ventana para registrar el movimiento.
+- **Cocina:** marco café entre etapas y **ventana de confirmación** antes de cada cambio de etapa (al arrastrar o con botones), con el detalle del pedido. Si se cancela, la comanda vuelve a su columna sin llamar a la API.
+- **Sellos de estado:** propuse un ícono por etapa (círculo de color con una figura). La IA los dibujó como SVG en un solo archivo (`_sellos.html`) reutilizado en Cocina, Pedidos, Inicio y Despachos.
+- **Mis decisiones:** el diseño, las imágenes, los colores y las figuras de cada sello; los sellos también para los estados fuera de cocina.
+
+### 3.13 Dominio propio y HTTPS
+
+**Prompt:** "Démosle nombre a la página con un DNS, hagámoslo desde DuckDNS."
+- **Respuesta de la IA:** explicó que con un dominio se puede obtener un certificado gratuito de Let's Encrypt (que no se entrega para una IP) y preparó dos configuraciones de Nginx (una para obtener el certificado y otra final con HTTPS, que redirige todo el tráfico HTTP), además de la opción `USAR_HTTPS` en `settings.py` para que las cookies de sesión y CSRF solo viajen cifradas.
+- **Verificación:** la IA simuló el servidor con Nginx y un certificado de prueba (login y llamada a la API por HTTPS). Yo lo configuré en AWS y comprobé el candado en **https://dulcearte.duckdns.org** y la redirección desde la IP.
+
+### 3.14 Nuevos roles: Cocina, Bodega y Repartidor
+
+**Prompt:** "¿La rúbrica pedía más interfaces para cada tarea?" y luego "Definamos cómo iría la interfaz de cada uno; mándame ejemplos visuales."
+- **Respuesta de la IA:** revisó el enunciado: no exige un número de interfaces, pero sí "permisos de seguridad según corresponda a los roles del caso". Propuso separar los roles por puesto de trabajo y mostró bocetos de la pantalla de inicio de cada uno.
+- **Implementación:** tres grupos nuevos en `crear_roles` con permisos mínimos; clases de permiso en `pedidos/permisos.py` (`EsAdminOCocina`, `EsAdminOBodega`, `EsAdminORepartidor`, `AdminOBodegaSoloLectura`) aplicadas a la API; un decorador `rol_requerido(...)` para las vistas web; barra e inicio distintos por rol; tres pantallas nuevas (Producción de mañana, Movimientos y Entregados).
+- **Verificación:** se probó con un usuario de cada rol qué páginas y qué llamadas a la API responden 200/201 o 403 (matriz completa), además de los flujos de cada rol y las 49 pruebas de la API.
+- **Mis decisiones:** un solo repartidor, así que ve todas las rutas; Cocina ve los precios para tener la comanda completa ante cualquier error; se incluyeron las pantallas extra para evaluar si se mantienen.
+
+### 3.15 Administrador como supervisor y contraseña para Administración
+
+**Prompt (resumen):** "El admin debe tener control de la plataforma, pero no debería interferir en las acciones de cocina, despachos o ventas; sí debería ver cómo trabajan. Al entrar a Administración, que pida la contraseña del usuario."
+- **Respuesta de la IA:** dejó al Administrador en **modo lectura** en la web y en la API: ve y busca pedidos (sin Nueva cotización, sin confirmar ni cancelar), ve el tablero de cocina sin botones ni arrastre, ve el inventario y el historial sin registrar movimientos, y en Despachos solo el historial completo de entregas (receptor, hora real vs. programada, ruta, productos, total y evidencias). Las clases de permiso de la API permiten al Administrador solo consultas (GET) en esas áreas.
+- **Contraseña para Administración:** una ventana pide la contraseña antes de ir al Django Admin; además, un middleware la exige en el servidor si se escribe `/admin/` directamente. La verificación dura 10 minutos mientras se usa el panel y tras 5 intentos fallidos se cierra la sesión.
+- **Verificación:** pruebas de API por rol (incluye que el Administrador recibe 403 al intentar avanzar pedidos, crear rutas, registrar movimientos o crear cotizaciones) y pruebas en navegador del modo lectura y de la contraseña (incorrecta, correcta y redirección segura).
+- **Mi decisión:** anular pedidos queda como acción del Django Admin.
+
 ## 4. Aprendizajes y criterio propio
 
 - **La IA aceleró mucho la escritura de código**, pero las decisiones del negocio fueron mías: los roles, la regla de 24 horas, el sistema de extras, firma y foto, el catálogo y la prioridad entre funcionalidad y diseño.

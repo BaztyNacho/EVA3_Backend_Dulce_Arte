@@ -1,0 +1,45 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Producción de mañana{% endblock %}
+
+{% block clase_pagina %}pagina--ancha{% endblock %}
+
+{% block titulo_banner %}Producción de mañana{% endblock %}
+{% block subtitulo_banner %}{{ manana|date:"l j \d\e F" }}: lo que hay que preparar con anticipación.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <a class="boton boton--secundario" href="{% url 'kanban' %}">Volver al tablero</a>
+  </div>
+{% endblock %}
+
+{% block contenido %}
+{% if pedidos %}
+  <div class="produccion">
+    {# Resumen: cuántas unidades de cada producto #}
+    <section class="panel produccion__resumen" aria-labelledby="t-resumen">
+      <h2 id="t-resumen">A preparar</h2>
+      <ul class="produccion__lista">
+        {% for nombre, cantidad in resumen %}
+          <li><span class="produccion__cantidad">{{ cantidad }}</span> {{ nombre }}</li>
+        {% endfor %}
+      </ul>
+      <p class="nota">{{ pedidos|length }} pedido{{ pedidos|length|pluralize }} para mañana.</p>
+    </section>
+
+    {# Las comandas de mañana, ordenadas por hora de entrega #}
+    <section aria-labelledby="t-comandas">
+      <h2 id="t-comandas" class="oculto-visual">Pedidos de mañana</h2>
+      <div class="comandas comandas--marco">
+        {% for pedido in pedidos %}
+          {% include 'web/_comanda.html' %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+{% else %}
+  <div class="panel vacio">
+    <p>No hay pedidos confirmados para mañana.</p>
+    <a class="boton boton--secundario" href="{% url 'kanban' %}">Volver al tablero</a>
+  </div>
+{% endif %}
+{% endblock %}

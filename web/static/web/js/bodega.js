@@ -64,7 +64,7 @@ document.querySelectorAll('[data-abrir-movimiento]').forEach((boton) => {
 vmTipo.addEventListener('change', () => { vmMotivo.placeholder = EJEMPLOS_MOTIVO[vmTipo.value]; });
 ventana.querySelector('[data-cerrar]').addEventListener('click', () => ventana.close());
 // Clic fuera de la ventana (en el fondo oscuro) también la cierra
-ventana.addEventListener('click', (evento) => { if (evento.target === ventana) ventana.close(); });
+ventana.addEventListener('click', (evento) => { if (esClicFuera(evento, ventana)) ventana.close(); });
 
 formVentana.addEventListener('submit', async (evento) => {
   evento.preventDefault();
@@ -101,3 +101,15 @@ document.getElementById('form-movimiento').addEventListener('submit', async (eve
   }, evento.submitter);
   if (error) mostrarAviso(error, 'error');
 });
+
+/* ---------- Acceso directo desde Inicio: ?accion=entrada o ?accion=ajuste ---------- */
+(() => {
+  const accion = new URLSearchParams(window.location.search).get('accion');
+  if (!['entrada', 'ajuste'].includes(accion)) return;
+  const form = document.getElementById('form-movimiento');
+  mTipo.value = accion;
+  document.getElementById('m-motivo').placeholder = EJEMPLOS_MOTIVO[accion];
+  form.classList.add('panel--destacado');
+  form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('m-insumo').focus({ preventScroll: true });
+})();

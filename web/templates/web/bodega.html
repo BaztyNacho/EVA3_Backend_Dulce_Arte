@@ -4,13 +4,14 @@
 {% block titulo %}Bodega{% endblock %}
 
 {% block titulo_banner %}Bodega{% endblock %}
-{% block subtitulo_banner %}El stock baja solo al confirmar pedidos. Aquí registras compras, mermas y correcciones.{% endblock %}
+{% block subtitulo_banner %}{% if solo_lectura %}Vista de supervisión: el inventario y su historial. Las entradas y mermas las registra Bodega.{% else %}El stock baja solo al confirmar pedidos. Aquí registras compras, mermas y correcciones.{% endif %}{% endblock %}
 {% block opciones_banner %}
   <div class="banner__opciones">
     <nav class="chips" aria-label="Filtrar insumos">
       <a class="chip" href="{% url 'bodega' %}" {% if not solo_bajo %}aria-current="true"{% endif %}>Todos</a>
       <a class="chip" href="{% url 'bodega' %}?stock=bajo" {% if solo_bajo %}aria-current="true"{% endif %}>Stock bajo ({{ total_bajo }})</a>
     </nav>
+    <a class="boton boton--secundario" href="{% url 'movimientos' %}">Ver movimientos</a>
   </div>
 {% endblock %}
 
@@ -32,6 +33,7 @@
               Mínimo: {{ insumo.stock_minimo|floatformat:"-3" }} {{ insumo.unidad }}
               {% if insumo.stock_bajo %}<span class="etiqueta-reponer">Reponer</span>{% endif %}
             </p>
+{% if not solo_lectura %}
             <button class="boton boton--chico ancho-completo" type="button"
                     data-abrir-movimiento
                     data-insumo="{{ insumo.pk }}"
@@ -39,6 +41,7 @@
                     data-unidad="{{ insumo.unidad }}"
                     data-stock="{{ insumo.stock_actual|floatformat:'-3' }}"
                     aria-label="Añadir movimiento de {{ insumo.nombre }}">Añadir</button>
+{% endif %}
           </li>
         {% endfor %}
       </ul>
@@ -50,6 +53,7 @@
   </section>
 
   <aside>
+{% if not solo_lectura %}
     {# Acceso rápido: registrar un movimiento eligiendo el insumo de la lista #}
     <form class="panel espacio-abajo" id="form-movimiento" novalidate>
       <h2>Registrar movimiento</h2>
@@ -77,9 +81,13 @@
       </div>
       <button class="boton ancho-completo" type="submit">Registrar movimiento</button>
     </form>
+{% endif %}
 
     <section class="panel" aria-labelledby="t-movimientos">
-      <h2 id="t-movimientos">Últimos movimientos</h2>
+      <div class="fila-extremos">
+        <h2 id="t-movimientos">Últimos movimientos</h2>
+        <a class="nota" href="{% url 'movimientos' %}">Ver todos</a>
+      </div>
       <ol class="linea-tiempo">
         {% for mov in movimientos %}
           <li>
@@ -96,6 +104,7 @@
   </aside>
 </div>
 
+{% if not solo_lectura %}
 {# Ventana que abre el botón "Añadir" de cada tarjeta #}
 <dialog class="ventana" id="ventana-movimiento" aria-labelledby="vm-titulo">
   <form id="form-ventana" novalidate>
@@ -123,8 +132,9 @@
     </div>
   </form>
 </dialog>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'web/js/bodega.js' %}"></script>
+{% if not solo_lectura %}<script src="{% static 'web/js/bodega.js' %}"></script>{% endif %}
 {% endblock %}

@@ -152,6 +152,8 @@ function dibujarLineas(hayNueva = false) {
     contenedor.append(caja);
   });
 
+  // El recuadro "Productos agregados" solo se muestra cuando hay productos
+  $('#panel-lineas').hidden = !estado.lineas.length;
   dibujarResumen();
 }
 

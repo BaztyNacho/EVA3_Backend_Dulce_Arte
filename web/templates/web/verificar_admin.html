@@ -1,0 +1,25 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Confirmar contraseña{% endblock %}
+
+{% block titulo_banner %}Administración{% endblock %}
+{% block subtitulo_banner %}Por seguridad, confirma tu contraseña antes de entrar al panel de administración.{% endblock %}
+
+{% block contenido %}
+<form class="panel verificar-admin" method="post" action="{% url 'verificar_admin' %}">
+  {% csrf_token %}
+  <svg class="verificar-admin__icono" aria-hidden="true"><use href="#icono-administracion"/></svg>
+  <h2>Confirma tu contraseña</h2>
+  <p class="nota">Es la misma contraseña con la que ingresaste como <strong>{{ user.username }}</strong>.</p>
+  {% if error %}<p class="ventana__error" role="alert">{{ error }}</p>{% endif %}
+  <input type="hidden" name="next" value="{{ destino }}">
+  <div class="campo">
+    <label for="va-password">Contraseña</label>
+    <input type="password" id="va-password" name="password" autocomplete="current-password" required autofocus>
+  </div>
+  <div class="ventana__acciones">
+    <a class="boton boton--secundario" href="{% url 'inicio' %}">Cancelar</a>
+    <button class="boton" type="submit">Entrar a Administración</button>
+  </div>
+</form>
+{% endblock %}

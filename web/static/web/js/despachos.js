@@ -16,34 +16,61 @@ try {
   }
 } catch (e) { /* sin almacenamiento */ }
 
-// Crear ruta
+/* ---------- Ventana "Nueva ruta" (solo existe en la pantalla Despachos) ---------- */
+const ventanaRuta = document.getElementById('ventana-ruta');
+const errorRuta = document.getElementById('vr-error');
+if (ventanaRuta) {
+
+function mostrarErrorRuta(texto) {
+  errorRuta.textContent = texto;
+  errorRuta.hidden = !texto;
+}
+
+document.querySelectorAll('[data-abrir-ruta]').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    mostrarErrorRuta('');
+    ventanaRuta.showModal();
+    document.getElementById('r-nombre').focus();
+  });
+});
+ventanaRuta.querySelector('[data-cerrar]').addEventListener('click', () => ventanaRuta.close());
+ventanaRuta.addEventListener('click', (evento) => { if (esClicFuera(evento, ventanaRuta)) ventanaRuta.close(); });
+
 document.getElementById('form-ruta').addEventListener('submit', async (evento) => {
   evento.preventDefault();
   const nombre = document.getElementById('r-nombre').value.trim();
   const fecha = document.getElementById('r-fecha').value;
-  if (!nombre || !fecha) { mostrarAviso('Indica el nombre y la fecha de la ruta.', 'error'); return; }
+  if (!nombre || !fecha) { mostrarErrorRuta('Indica el nombre y la fecha de la ruta.'); return; }
+  evento.submitter.disabled = true;
   const { ok, datos } = await llamarApi('/api/rutas/', { metodo: 'POST', json: { nombre, fecha } });
-  if (ok) recargarConAviso(`Ruta "${datos.nombre}" creada.`);
-  else mostrarAviso(textosDeError(datos).join(' '), 'error');
+  evento.submitter.disabled = false;
+  if (ok) recargarConAviso(`Ruta "${datos.nombre}" creada. Ahora agrégale pedidos desde "Por asignar".`);
+  else mostrarErrorRuta(textosDeError(datos).join(' '));
 });
+}
 
-// Asignar un despacho a una ruta (queda al final de la ruta)
-document.querySelectorAll('.parada__asignar').forEach((form) => {
+/* ---------- Agregar un pedido a una ruta (queda como última parada) ---------- */
+document.querySelectorAll('.tarjeta-despacho__asignar').forEach((form) => {
   form.addEventListener('submit', async (evento) => {
     evento.preventDefault();
-    const rutaId = Number(form.querySelector('select').value);
+    const select = form.querySelector('select');
+    const rutaId = Number(select.value);
+    // Si la ruta ya salió, el pedido queda directamente "En camino"
+    const rutaEnCurso = select.selectedOptions[0].dataset.estado === 'en_curso';
+    evento.submitter.disabled = true;
     const ruta = await llamarApi(`/api/rutas/${rutaId}/`);
     const orden = ruta.ok ? ruta.datos.despachos.length + 1 : 1;
     const { ok, datos } = await llamarApi(`/api/despachos/${form.dataset.despacho}/`, {
       metodo: 'PATCH',
-      json: { ruta: rutaId, orden, estado: 'pendiente' },
+      json: { ruta: rutaId, orden, estado: rutaEnCurso ? 'en_camino' : 'pendiente' },
     });
-    if (ok) recargarConAviso(`Pedido #${datos.pedido} asignado a ${datos.ruta_nombre} como parada ${orden}.`);
+    evento.submitter.disabled = false;
+    if (ok) recargarConAviso(`Pedido #${datos.pedido} agregado a ${datos.ruta_nombre} como parada ${orden}.`);
     else mostrarAviso(textosDeError(datos).join(' '), 'error');
   });
 });
 
-// Quitar un despacho de su ruta
+/* ---------- Quitar un pedido de su ruta ---------- */
 document.querySelectorAll('[data-quitar]').forEach((boton) => {
   boton.addEventListener('click', async () => {
     const { ok, datos } = await llamarApi(`/api/despachos/${boton.dataset.quitar}/`, {
@@ -55,7 +82,8 @@ document.querySelectorAll('[data-quitar]').forEach((boton) => {
   });
 });
 
-// Iniciar o finalizar una ruta. Al iniciarla, sus despachos pendientes quedan "En camino".
+/* ---------- Iniciar o finalizar una ruta ----------
+ * Al iniciarla, sus despachos pendientes quedan "En camino". */
 document.querySelectorAll('[data-ruta-estado]').forEach((boton) => {
   boton.addEventListener('click', async () => {
     const id = boton.dataset.ruta;
@@ -67,9 +95,9 @@ document.querySelectorAll('[data-ruta-estado]').forEach((boton) => {
       for (const despacho of datos.despachos.filter((d) => d.estado === 'pendiente')) {
         await llamarApi(`/api/despachos/${despacho.id}/`, { metodo: 'PATCH', json: { estado: 'en_camino' } });
       }
-      recargarConAviso(`${datos.nombre} iniciada. Sus despachos están en camino.`);
+      recargarConAviso(`${datos.nombre} iniciada. Entrega cada parada con el botón "Entregar".`);
     } else {
-      recargarConAviso(`${datos.nombre} finalizada.`);
+      recargarConAviso(`${datos.nombre} finalizada. ¡Buen trabajo!`);
     }
   });
 });

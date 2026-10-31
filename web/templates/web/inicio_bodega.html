@@ -1,0 +1,75 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block clase_pagina %}pagina--ancha{% endblock %}
+
+{% block titulo_banner %}Hola, {{ user.first_name|default:user.username }}{% endblock %}
+{% block subtitulo_banner %}{% now "l j \d\e F" %}. Así está la bodega.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <a class="boton" href="{% url 'bodega' %}?accion=entrada">Registrar entrada</a>
+  </div>
+{% endblock %}
+
+{% block contenido %}
+<div class="inicio">
+
+  {# ---------- Izquierda: insumos por reponer ---------- #}
+  <section class="inicio__entregas" aria-labelledby="t-reponer">
+    <h2 id="t-reponer" class="inicio__titulo">Reponer pronto</h2>
+    <div class="marco">
+      {% for insumo in reponer %}
+        <a class="aviso-insumo{% if insumo.stock_bajo %} aviso-insumo--bajo{% endif %}" href="{% url 'bodega' %}#insumo-{{ insumo.pk }}">
+          {% include 'web/_imagen.html' with imagen=insumo.imagen nombre=insumo.nombre clase='aviso-insumo__foto' %}
+          <span class="aviso-insumo__datos">
+            <strong>{{ insumo.nombre }}</strong>
+            <span>Quedan {{ insumo.stock_actual|floatformat:"-3" }} {{ insumo.unidad }}</span>
+            <span class="nota">Mínimo {{ insumo.stock_minimo|floatformat:"-3" }} {{ insumo.unidad }}</span>
+          </span>
+          <span class="etiqueta-reponer{% if not insumo.stock_bajo %} etiqueta-reponer--pronto{% endif %}">{% if insumo.stock_bajo %}Reponer{% else %}Pronto{% endif %}</span>
+        </a>
+      {% empty %}
+        <p class="marco__vacio">Todo el inventario está sobre el mínimo.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ---------- Centro: menú de acceso rápido ---------- #}
+  <section class="inicio__menu" aria-labelledby="t-menu">
+    <h2 id="t-menu" class="oculto-visual">Acceso rápido</h2>
+    <nav class="accesos" aria-label="Acceso rápido">
+      <a class="acceso-rapido" href="{% url 'bodega' %}">
+        <svg aria-hidden="true"><use href="#icono-bodega"/></svg><span>Inventario</span>
+      </a>
+      <a class="acceso-rapido" href="{% url 'bodega' %}?accion=entrada">
+        <svg aria-hidden="true"><use href="#icono-entrada"/></svg><span>Registrar entrada</span>
+      </a>
+      <a class="acceso-rapido" href="{% url 'bodega' %}?accion=ajuste">
+        <svg aria-hidden="true"><use href="#icono-merma"/></svg><span>Registrar merma</span>
+      </a>
+      <a class="acceso-rapido" href="{% url 'movimientos' %}">
+        <svg aria-hidden="true"><use href="#icono-movimientos"/></svg><span>Movimientos</span>
+      </a>
+    </nav>
+  </section>
+
+  {# ---------- Derecha: resumen ---------- #}
+  <section class="inicio__cifras" aria-label="Resumen de bodega">
+    <div class="marco">
+      <a class="cifra{% if bajo_minimo %} cifra--alerta{% endif %}" href="{% url 'bodega' %}?stock=bajo">
+        <strong>{{ bajo_minimo }}</strong><span>bajo el mínimo</span>
+      </a>
+      <a class="cifra" href="{% url 'bodega' %}">
+        <strong>{{ insumos_activos }}</strong><span>insumos activos</span>
+      </a>
+      <a class="cifra" href="{% url 'movimientos' %}?periodo=hoy">
+        <strong>{{ movimientos_hoy }}</strong><span>movimientos hoy</span>
+      </a>
+      <a class="cifra" href="{% url 'movimientos' %}?periodo=hoy&tipo=salida">
+        <strong>{{ pedidos_hoy }}</strong><span>pedidos que descontaron stock hoy</span>
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}

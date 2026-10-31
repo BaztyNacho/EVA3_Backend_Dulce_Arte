@@ -7,10 +7,11 @@ Autor: Bastian Sandoval
 
 | | |
 |---|---|
-| **IP pública (AWS EC2)** | **http://54.84.222.180/** |
-| Panel de administración | http://54.84.222.180/admin/ |
-| Documentación de la API (Swagger) | http://54.84.222.180/api/docs/ (requiere iniciar sesión) |
-| API navegable | http://54.84.222.180/api/ |
+| **Dirección de la aplicación** | **https://dulcearte.duckdns.org/** |
+| IP pública (AWS EC2, Elastic IP) | 54.84.222.180 (redirige al dominio con HTTPS) |
+| Panel de administración | https://dulcearte.duckdns.org/admin/ |
+| Documentación de la API (Swagger) | https://dulcearte.duckdns.org/api/docs/ (requiere iniciar sesión) |
+| API navegable | https://dulcearte.duckdns.org/api/ |
 
 Las credenciales de los usuarios de prueba (Administrador y Atención y Ventas) se entregan al docente en la defensa; no se publican en el repositorio.
 
@@ -42,13 +43,20 @@ Dulce Arte no tenía coordinación entre la toma de pedidos personalizados, la d
 
 | Rol | Acceso |
 |---|---|
-| **Administrador** | Todo: cocina (Kanban), bodega, despachos, Django Admin y API completa. |
-| **Atención y Ventas** | Catálogo para atender clientes, cotizar, registrar y confirmar pedidos, consultar su estado. Sin acceso a cocina, bodega, despachos ni Admin. |
+| **Administrador** | Supervisa: ve pedidos (y los busca), el tablero de cocina, el inventario con su historial y el historial completo de despachos, **sin intervenir** en el trabajo de los demás roles. Gestiona todo desde el Django Admin, que pide confirmar la contraseña antes de entrar. |
+| **Atención y Ventas** | Catálogo para atender clientes, cotizar, registrar y confirmar pedidos, consultar su estado. |
+| **Cocina** | Tablero Kanban, detalle de pedidos (con precios) y producción de mañana. No cotiza ni cancela. |
+| **Bodega** | Inventario, registro de entradas y mermas, historial de movimientos. No crea ni edita insumos o recetas. |
+| **Repartidor** | Su ruta del día, rutas de despacho, entrega con firma o foto e historial de entregas. |
+
+Cada rol tiene su propia pantalla de inicio y solo ve en la barra lo que corresponde a su puesto. Las restricciones se aplican en las vistas web **y** en la API (no basta con ocultar enlaces).
 
 - Autenticación con sesiones de Django; la API usa la misma sesión con protección CSRF.
+- Antes de entrar al Django Admin se vuelve a pedir la contraseña (middleware `web/middleware.py`); la verificación dura 10 minutos y tras 5 intentos fallidos se cierra la sesión.
 - Permisos por grupo (`DjangoModelPermissions`) y reglas por rol en la API y en las vistas.
 - Reglas de negocio validadas en el servidor (capa `services.py` con transacciones atómicas), no solo en el navegador.
 - Configuración sensible en variables de entorno (`.env`); `DEBUG=False` en producción.
+- HTTPS con certificado de Let's Encrypt; las cookies de sesión y CSRF solo viajan cifradas.
 - PostgreSQL solo acepta conexiones locales (no está expuesto a internet).
 
 ## Tecnologías
@@ -56,12 +64,12 @@ Dulce Arte no tenía coordinación entre la toma de pedidos personalizados, la d
 - **Backend:** Python 3.14, Django 5.2 LTS, Django REST Framework, drf-spectacular (Swagger)
 - **Base de datos:** PostgreSQL
 - **Frontend:** templates de Django + HTML/CSS/JavaScript (fetch a la API), SortableJS
-- **Servidor:** AWS EC2 (Ubuntu), Nginx + Gunicorn
+- **Servidor:** AWS EC2 (Ubuntu), Nginx + Gunicorn, dominio DuckDNS y certificado Let's Encrypt
 
 ## Arquitectura
 
 ```
-Navegador ──► Nginx (puerto 80) ──► Gunicorn ──► Django + DRF ──► PostgreSQL
+Navegador ──► Nginx (443 HTTPS; el 80 redirige) ──► Gunicorn ──► Django + DRF ──► PostgreSQL
                  │                                              (misma instancia EC2)
                  └── sirve /static/ y /media/ directamente
 ```
@@ -81,6 +89,9 @@ Navegador ──► Nginx (puerto 80) ──► Gunicorn ──► Django + DRF 
 | `/ingresar/` | Inicio de sesión |
 | `/` | Inicio con resumen del día |
 | `/catalogo/` | Catálogo de productos con ingredientes, extras, precio y tiempo de preparación (Atención y Ventas) |
+| `/cocina/manana/` | Producción de mañana (Cocina) |
+| `/bodega/movimientos/` | Historial de movimientos de bodega (Bodega) |
+| `/despachos/entregados/` | Historial de entregas con firma o comprobante (Repartidor) |
 | `/pedidos/` · `/pedidos/nuevo/` | Lista de pedidos y cotizador |
 | `/cocina/` | Tablero Kanban (Administrador) |
 | `/bodega/` | Stock y movimientos (Administrador) |
@@ -117,7 +128,7 @@ CREATE DATABASE db_dulce_arte OWNER dulce_user;
 ```powershell
 # 5. Preparar la base de datos y los datos iniciales
 python manage.py migrate
-python manage.py crear_roles        # grupos Administrador y Atención y Ventas
+python manage.py crear_roles        # grupos Administrador, Atención y Ventas, Cocina, Bodega y Repartidor
 python manage.py cargar_catalogo    # 30 insumos, 11 productos con receta, 18 extras y fotos
 python manage.py createsuperuser
 
@@ -125,11 +136,11 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Abrir http://127.0.0.1:8000/. Los usuarios de Atención y Ventas se crean en el Admin y se agregan al grupo "Atención y Ventas".
+Abrir http://127.0.0.1:8000/. Los usuarios de cada rol se crean en el Admin y se agregan a su grupo (por ejemplo, "Cocina").
 
 ## Despliegue en AWS EC2
 
-Instancia Ubuntu en AWS Academy (us-east-1) con Elastic IP, grupo de seguridad con puertos 22 (SSH) y 80 (HTTP).
+Instancia Ubuntu en AWS Academy (us-east-1) con Elastic IP, grupo de seguridad con puertos 22 (SSH), 80 (HTTP) y 443 (HTTPS).
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -172,7 +183,23 @@ sudo nginx -t && sudo systemctl restart nginx
 bash ~/dulce-arte/deploy/actualizar.sh
 ```
 
-> Nota sobre HTTPS: `check --deploy` advierte que no hay SSL. Para HTTPS se necesita un dominio propio; en producción real se agregaría uno con un certificado de Let's Encrypt (Certbot) y se activarían `SECURE_SSL_REDIRECT` y las cookies seguras.
+### Dominio y HTTPS
+
+1. En [DuckDNS](https://www.duckdns.org) se creó el subdominio `dulcearte.duckdns.org` apuntando a la Elastic IP.
+2. Certificado gratuito de Let's Encrypt (se renueva solo cada 90 días):
+
+```bash
+DOMINIO=dulcearte.duckdns.org
+sudo mkdir -p /var/www/certbot
+sudo cp deploy/nginx_dulce_arte.conf /etc/nginx/sites-available/dulce_arte
+sudo nginx -t && sudo systemctl reload nginx
+sudo apt install -y certbot
+sudo certbot certonly --webroot -w /var/www/certbot -d $DOMINIO --agree-tos -m <correo> --no-eff-email --deploy-hook "systemctl reload nginx"
+sed "s/DOMINIO/$DOMINIO/g" deploy/nginx_dulce_arte_https.conf | sudo tee /etc/nginx/sites-available/dulce_arte > /dev/null
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+3. En el `.env` del servidor: `ALLOWED_HOSTS=dulcearte.duckdns.org,54.84.222.180`, `CSRF_TRUSTED_ORIGINS=https://dulcearte.duckdns.org` y `USAR_HTTPS=True`; luego `sudo systemctl restart gunicorn`.
 
 ## Apoyo de Inteligencia Artificial
 

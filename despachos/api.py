@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from pedidos.permisos import EsAdministrador, ProtegidoContraBorradoMixin
+from pedidos.permisos import EsAdminORepartidor, ProtegidoContraBorradoMixin
 from pedidos.services import ReglaNegocioError
 
 from .models import Despacho, Ruta
@@ -20,7 +20,7 @@ class RutaViewSet(ProtegidoContraBorradoMixin, viewsets.ModelViewSet):
     """Rutas de reparto con sus despachos."""
 
     serializer_class = RutaSerializer
-    permission_classes = [EsAdministrador]
+    permission_classes = [EsAdminORepartidor]
     queryset = Ruta.objects.select_related('responsable').prefetch_related(
         'despachos__pedido__cliente'
     )
@@ -38,7 +38,7 @@ class DespachoViewSet(
     """
 
     serializer_class = DespachoSerializer
-    permission_classes = [EsAdministrador]
+    permission_classes = [EsAdminORepartidor]
     queryset = Despacho.objects.select_related('pedido__cliente', 'ruta')
 
     def get_queryset(self):

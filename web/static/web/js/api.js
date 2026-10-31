@@ -66,6 +66,17 @@ function mostrarAviso(texto, tipo = 'info') {
   aviso.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+/**
+ * ¿El clic fue en el fondo oscuro, fuera de la ventana (<dialog>)?
+ * Se comparan las coordenadas con el rectángulo de la ventana; así un clic en el
+ * borde interno de la ventana no la cierra por error.
+ */
+function esClicFuera(evento, dialogo) {
+  if (evento.target !== dialogo) return false;
+  const r = dialogo.getBoundingClientRect();
+  return evento.clientX < r.left || evento.clientX > r.right || evento.clientY < r.top || evento.clientY > r.bottom;
+}
+
 /** Formatea pesos chilenos: 25000 -> $25.000 */
 function clp(valor) {
   return '$' + Math.round(valor).toLocaleString('es-CL');

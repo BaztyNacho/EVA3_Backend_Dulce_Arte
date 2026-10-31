@@ -83,23 +83,7 @@
       </section>
     {% endif %}
 
-    {% if puede_cancelar %}
-      <details class="panel espacio-abajo">
-        <summary><strong>Cancelar pedido</strong></summary>
-        <form id="form-cancelar" class="espacio-arriba">
-          <p class="nota">
-            {% if pedido.estado == 'recibido' %}Como aún no se empieza a preparar, los insumos vuelven a bodega.
-            {% elif pedido.estado == 'cotizacion' %}La cotización quedará cancelada.
-            {% else %}El pedido ya está en preparación: los insumos se consideran consumidos.{% endif %}
-          </p>
-          <div class="campo">
-            <label for="motivo">Motivo</label>
-            <input type="text" id="motivo" maxlength="200" placeholder="Ej.: el cliente desistió">
-          </div>
-          <button class="boton boton--peligro" type="submit">Cancelar pedido</button>
-        </form>
-      </details>
-    {% endif %}
+    {# Anular un pedido es una acción de Administración (Django Admin → Pedidos → acción "Cancelar"). #}
 
     <section class="panel" aria-labelledby="t-historial">
       <h2 id="t-historial">Historial</h2>

@@ -78,6 +78,8 @@
   --alto-logo: 118px;        /* el logo sobresale hacia abajo de la barra */
 
   --marco-tablero: #7A4232;   /* marco café del Kanban */
+  --borde-menu: #A08374;
+  --marco-claro: #7E5B4B;     /* fondo café claro detrás de las comandas de Pedidos */      /* borde de los botones del menú de Inicio */
 
   --radio: 10px;
   --sombra-papel: 0 1px 0 rgba(59, 36, 32, 0.06), 0 6px 18px -10px rgba(59, 36, 32, 0.35);
@@ -428,6 +430,13 @@ a.comanda:hover { box-shadow: var(--sombra-papel-alzada); }
 .comanda__total { font-weight: 600; font-variant-numeric: tabular-nums; }
 .comanda--urgente .comanda__hora { color: var(--alerta); }
 
+.comandas--marco {
+  background: var(--marco-claro);
+  border-radius: 16px;
+  padding: var(--espacio-6) var(--espacio-5) var(--espacio-5);
+  box-shadow: 0 14px 30px -18px rgba(30, 15, 12, 0.7);
+}
+@media (max-width: 640px) { .comandas--marco { padding: var(--espacio-5) var(--espacio-3) var(--espacio-3); } }
 .comandas { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--espacio-5) 1.25rem; }
 
 /* ---------------- Inicio ---------------- */
@@ -489,6 +498,30 @@ a.cifra:hover { border-color: var(--frambuesa); }
 .sugerencias__vacio { padding: 0.55rem var(--espacio-3); }
 .cliente-elegido { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-3); background: var(--frambuesa-clara); border-radius: 8px; padding: 0.65rem 0.85rem; }
 
+/* Cotizador en tres columnas: datos del cliente | catálogo disponible | recibo */
+.cotizador {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr) 320px;
+  gap: var(--espacio-5);
+  align-items: start;
+}
+.cotizador__titulo { font-size: var(--t-xl); margin: 0 0 var(--espacio-3); }
+.cotizador h3 { font-size: var(--t-l); margin-bottom: var(--espacio-2); }
+.cotizador .catalogo { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.cotizador__recibo { position: sticky; top: var(--espacio-4); }
+.cotizador .resumen { position: static; }
+/* Pantallas medianas: el recibo a la derecha; datos y catálogo uno sobre otro */
+@media (max-width: 1200px) {
+  .cotizador { grid-template-columns: minmax(0, 1fr) 320px; }
+  .cotizador__datos { grid-column: 1; }
+  .cotizador__catalogo { grid-column: 1; }
+  .cotizador__recibo { grid-column: 2; grid-row: 1 / span 2; }
+}
+/* Celular: todo en una columna; el recibo al final */
+@media (max-width: 900px) {
+  .cotizador { grid-template-columns: 1fr; }
+  .cotizador__recibo { grid-column: 1; grid-row: auto; position: static; }
+}
 .resumen { position: sticky; top: var(--espacio-4); }
 .resumen .comanda__lineas li { display: flex; justify-content: space-between; gap: var(--espacio-3); }
 .resumen__titulo { font-size: var(--t-l); }
@@ -532,6 +565,102 @@ a.cifra:hover { border-color: var(--frambuesa); }
 }
 .acceso .campo label { font-size: var(--t-s); }
 
+/* =================================================================
+   INICIO — entregas (izq.), menú de acceso rápido (centro), cifras (der.)
+   ================================================================= */
+.inicio {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 230px;
+  grid-template-areas: "entregas menu cifras";
+  gap: var(--espacio-6);
+  align-items: start;
+}
+.inicio__entregas { grid-area: entregas; }
+.inicio__menu { grid-area: menu; margin-top: 2.6rem; }
+.inicio__cifras { grid-area: cifras; margin-top: 2.6rem; }
+.inicio__titulo { font-size: var(--t-l); margin: 0 0 var(--espacio-3); }
+
+/* Marco café (igual que el tablero de Cocina) que agrupa comandas o cifras */
+.marco {
+  display: grid;
+  gap: var(--espacio-4);
+  background: var(--marco-tablero);
+  border-radius: 16px;
+  padding: var(--espacio-4) var(--espacio-3);
+  box-shadow: 0 14px 30px -18px rgba(30, 15, 12, 0.7);
+}
+.marco .comanda { margin-top: 8px; }   /* espacio para el borde perforado */
+.marco__vacio { color: var(--barra-texto); text-align: center; margin: var(--espacio-4) auto; font-size: var(--t-s); }
+.marco .cifra { border: 0; }
+.marco > .boton--secundario { background: var(--papel); border-color: var(--papel); }
+.marco > .boton--secundario:hover { background: var(--caramelo-claro); }
+
+/* Botones del menú de acceso rápido: icono arriba y nombre abajo */
+.accesos { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--espacio-4); }
+.acceso-rapido {
+  width: 200px;
+  min-height: 160px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--espacio-3);
+  padding: var(--espacio-4);
+  background: var(--papel);
+  border: 6px solid var(--borde-menu);
+  border-radius: 16px;
+  color: var(--chocolate);
+  text-decoration: none;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--sombra-papel);
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.acceso-rapido svg {
+  width: 60px; height: 60px;
+  color: var(--marco-tablero);
+  fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round;
+  transition: color 0.18s ease;
+}
+.acceso-rapido span {
+  font-family: var(--fuente-titulo);
+  font-size: 1.12rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-align: center;
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+}
+.acceso-rapido:hover { border-color: var(--frambuesa); color: var(--chocolate); box-shadow: var(--sombra-papel-alzada); }
+.acceso-rapido:hover svg { color: var(--frambuesa); }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .acceso-rapido:hover { transform: translateY(-3px); }
+}
+.acceso-rapido:active { transform: translateY(0) scale(0.98); }
+
+/* Pantallas medianas: el menú arriba; entregas y cifras debajo, lado a lado */
+@media (max-width: 1100px) {
+  .inicio { grid-template-columns: 1fr 1fr; grid-template-areas: "menu menu" "entregas cifras"; }
+  .inicio__menu { margin-top: 0; }
+}
+/* Celular: menú, cifras y entregas, uno debajo del otro */
+@media (max-width: 700px) {
+  .inicio { grid-template-columns: 1fr; grid-template-areas: "menu" "cifras" "entregas"; gap: var(--espacio-5); }
+  .inicio__cifras { margin-top: 0; }
+  .inicio__cifras .marco { grid-template-columns: 1fr 1fr; }
+  .acceso-rapido { width: calc(50% - var(--espacio-2)); min-height: 130px; border-width: 4px; }
+  .acceso-rapido svg { width: 46px; height: 46px; }
+  .acceso-rapido span { font-size: var(--t-m); }
+}
+
+/* Ventana ancha (lista de todas las próximas entregas) */
+.ventana.ventana--ancha { width: min(1100px, calc(100% - 2rem)); background: var(--vainilla); }
+.ventana__cabecera { display: flex; justify-content: space-between; align-items: center; gap: var(--espacio-4); margin-bottom: var(--espacio-4); }
+.ventana__cabecera h2 { margin: 0; }
+.ventana__cerrar {
+  border: 1px solid var(--borde-campo); background: var(--papel); color: var(--chocolate);
+  width: 2.4rem; height: 2.4rem; border-radius: 50%; font-size: 1.5rem; line-height: 1; cursor: pointer;
+}
+.ventana__cerrar:hover { border-color: var(--frambuesa); color: var(--frambuesa); }
+
 /* ---------------- Botones pequeños y acciones de comanda ---------------- */
 .boton--chico { padding: 0.4rem 0.85rem; font-size: var(--t-s); }
 .comanda__acciones { display: flex; gap: var(--espacio-2); flex-wrap: wrap; align-items: center; margin-top: var(--espacio-3); }
@@ -572,6 +701,7 @@ a.cifra:hover { border-color: var(--frambuesa); }
 .columna__lista { flex: 1; display: flex; flex-direction: column; gap: var(--espacio-4); padding-top: 8px; min-height: 120px; }
 .columna__vacia { color: var(--chocolate-suave); font-size: var(--t-s); text-align: center; margin: var(--espacio-5) 0; }
 .comanda--kanban { cursor: grab; touch-action: pan-y; }
+.tablero--solo-lectura .comanda--kanban { cursor: default; }
 .comanda--kanban .comanda__hora { font-size: var(--t-l); }
 .comanda--kanban .comanda__lineas { margin-top: 0.4rem; }
 /* Sello de estado: círculo con figura, como una estampa en la esquina.
@@ -670,6 +800,221 @@ a.cifra:hover { border-color: var(--frambuesa); }
 }
 
 /* =================================================================
+   DESPACHOS — guía de pasos y tablero de reparto en tres columnas
+   ================================================================= */
+.guia-pasos {
+  list-style: none; margin: 0 0 var(--espacio-5); padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--espacio-3);
+}
+.guia-pasos__paso {
+  display: flex; align-items: center; gap: var(--espacio-3);
+  background: var(--papel); border: 2px solid var(--borde); border-radius: 999px;
+  padding: var(--espacio-2) var(--espacio-4) var(--espacio-2) var(--espacio-2);
+  color: var(--chocolate-suave); font-size: var(--t-s); font-weight: 500;
+}
+.guia-pasos__numero {
+  flex: none; width: 2rem; height: 2rem; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--caramelo-claro); color: var(--caramelo-oscuro);
+  font-family: var(--fuente-titulo); font-weight: 600;
+}
+.guia-pasos__paso--activo { border-color: var(--frambuesa); color: var(--chocolate); box-shadow: var(--sombra-papel-alzada); }
+.guia-pasos__paso--activo .guia-pasos__numero { background: var(--frambuesa); color: var(--papel); }
+.guia-pasos__listo { text-align: center; color: var(--pistacho-oscuro); font-weight: 500; margin: calc(-1 * var(--espacio-3)) auto var(--espacio-5); }
+
+.reparto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: var(--espacio-5);
+  align-items: start;
+}
+.reparto__columna {
+  background: var(--marco-claro);
+  border-radius: 16px;
+  padding: var(--espacio-4);
+  display: grid; gap: var(--espacio-3);
+  box-shadow: 0 14px 30px -18px rgba(30, 15, 12, 0.7);
+}
+.reparto__titulo {
+  display: flex; align-items: center; gap: var(--espacio-2);
+  margin: 0; font-size: var(--t-l); color: var(--papel);
+}
+.reparto__icono {
+  width: 30px; height: 30px; flex: none; color: var(--papel);
+  fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round;
+}
+.reparto__vacio {
+  margin: 0; text-align: center; color: var(--barra-texto); font-size: var(--t-s);
+  border: 2px dashed rgba(255, 255, 255, 0.3); border-radius: var(--radio); padding: var(--espacio-4);
+}
+
+/* Tarjeta de un pedido (Por asignar / Entregados) */
+.tarjeta-despacho {
+  display: grid; gap: 0.15rem;
+  background: var(--papel); border-radius: var(--radio); padding: var(--espacio-3) var(--espacio-4);
+  font-size: var(--t-s);
+}
+.tarjeta-despacho strong { font-size: var(--t-m); }
+.tarjeta-despacho--fallido { box-shadow: inset 4px 0 0 var(--alerta); }
+.tarjeta-despacho .etiqueta-reponer { justify-self: start; margin-top: var(--espacio-1); }
+.tarjeta-despacho__asignar { display: flex; gap: var(--espacio-2); margin-top: var(--espacio-2); }
+.tarjeta-despacho__asignar select { flex: 1; min-width: 0; padding: 0.4rem 0.5rem; font-size: var(--t-s); }
+.tarjeta-despacho--entregado { box-shadow: inset 4px 0 0 var(--pistacho); }
+.tarjeta-despacho__firma { max-height: 54px; width: auto; margin-top: var(--espacio-2); border: 1px dashed var(--borde); border-radius: 6px; background: var(--papel); }
+
+/* Hoja de ruta */
+.hoja-ruta { background: var(--papel); border-radius: var(--radio); padding: var(--espacio-4); }
+.hoja-ruta__cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--espacio-3); }
+.hoja-ruta__cabecera h3 { margin: 0; font-size: var(--t-l); }
+.hoja-ruta__avance { margin: var(--espacio-3) 0; font-size: var(--t-s); font-weight: 500; }
+.hoja-ruta__barra { height: 8px; background: var(--fondo-medidor); border-radius: 999px; overflow: hidden; margin-top: var(--espacio-1); }
+.hoja-ruta__barra span { display: block; height: 100%; background: var(--pistacho); border-radius: 999px; transition: width 0.3s cubic-bezier(0.2, 0, 0, 1); }
+.hoja-ruta__paradas { list-style: none; margin: 0; padding: 0; }
+.hoja-ruta__vacia { margin: var(--espacio-3) 0; }
+.hoja-ruta__pie { margin-top: var(--espacio-3); }
+.hoja-ruta__pie .nota { margin: 0; text-align: center; }
+
+.parada-ruta {
+  display: flex; align-items: center; gap: var(--espacio-3);
+  padding: var(--espacio-3) var(--espacio-2);
+  border-top: 1px dashed var(--borde);
+  border-radius: 8px;
+}
+.parada-ruta__numero {
+  flex: none; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  display: grid; place-items: center; font-weight: 600; font-size: var(--t-s);
+  background: var(--harina); color: var(--harina-oscura);
+}
+.parada-ruta__datos { flex: 1; min-width: 0; display: grid; }
+.parada-ruta__datos .nota { overflow-wrap: anywhere; }
+.parada-ruta__accion { flex: none; }
+.parada-ruta--hecha .parada-ruta__numero { background: var(--pistacho-claro); color: var(--pistacho-oscuro); }
+.parada-ruta--hecha .parada-ruta__datos strong { color: var(--chocolate-suave); text-decoration: line-through; font-weight: 500; }
+/* La siguiente parada se destaca: es la que el repartidor debe entregar ahora */
+.parada-ruta--siguiente { background: var(--frambuesa-clara); border-top-color: transparent; }
+.parada-ruta--siguiente .parada-ruta__numero { background: var(--frambuesa); color: var(--papel); }
+
+/* Pantallas medianas: rutas arriba a lo ancho; por asignar y entregados debajo */
+@media (max-width: 1100px) {
+  .reparto { grid-template-columns: 1fr 1fr; }
+  .reparto__rutas { grid-column: 1 / -1; order: -1; }
+}
+/* Celular: rutas, por asignar y entregados, uno debajo del otro */
+@media (max-width: 700px) {
+  .guia-pasos { grid-template-columns: 1fr 1fr; }
+  .reparto { grid-template-columns: 1fr; }
+  .reparto__columna { padding: var(--espacio-3); }
+  .parada-ruta { flex-wrap: wrap; }
+  .parada-ruta__accion { width: 100%; padding-left: 2.6rem; }
+  .parada-ruta__accion .boton { width: 100%; padding: 0.6rem; font-size: var(--t-m); }
+}
+
+/* =================================================================
+   ROLES: Cocina, Bodega y Repartidor
+   ================================================================= */
+/* Cifras de Cocina con el sello de cada etapa */
+.cifra--etapa { position: relative; overflow: hidden; }
+.cifra--etapa .comanda__sello svg { width: 70px; height: 70px; top: 50%; right: -14px; transform: translateY(-50%) rotate(-12deg); opacity: 0.35; }
+.cifra--etapa > :not(.comanda__sello) { position: relative; }
+
+/* Avisos de stock en el Inicio de Bodega */
+.aviso-insumo {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: var(--espacio-3);
+  background: var(--papel); border-radius: var(--radio); padding: var(--espacio-2) var(--espacio-3);
+  text-decoration: none; color: var(--chocolate); font-size: var(--t-s);
+  box-shadow: inset 4px 0 0 var(--caramelo);
+}
+.aviso-insumo--bajo { box-shadow: inset 4px 0 0 var(--alerta); }
+.aviso-insumo:hover { color: var(--chocolate); background: var(--caramelo-claro); }
+.aviso-insumo__foto { width: 52px; height: 52px; aspect-ratio: 1; border-radius: 8px; }
+.aviso-insumo__foto.foto--vacia span { font-size: 1.4rem; }
+.aviso-insumo__datos { display: grid; line-height: 1.35; }
+.etiqueta-reponer--pronto { background: var(--caramelo-claro); color: var(--caramelo-oscuro); }
+
+/* Inicio del Repartidor: la ruta al centro y un lateral con accesos y cifras */
+.reparto-inicio { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: var(--espacio-6); align-items: start; max-width: 1000px; margin: 0 auto; }
+.reparto-inicio__lateral { margin-top: 2.6rem; }
+.accesos--compactos { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-3); }
+.accesos--compactos .acceso-rapido { width: auto; min-height: 120px; border-width: 4px; }
+.accesos--compactos .acceso-rapido svg { width: 44px; height: 44px; }
+.accesos--compactos .acceso-rapido span { font-size: var(--t-m); }
+.boton--sobre-marco { background: var(--papel); border-color: var(--papel); }
+
+.siguiente-parada {
+  background: var(--papel); border-radius: var(--radio); padding: var(--espacio-5);
+  border: 3px solid var(--frambuesa); display: grid; gap: var(--espacio-2);
+}
+.siguiente-parada__etiqueta { font-size: var(--t-xs); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--frambuesa-oscura); }
+.siguiente-parada h3 { display: flex; align-items: center; gap: var(--espacio-3); margin: 0; font-size: var(--t-xl); }
+.siguiente-parada h3 .parada-ruta__numero { background: var(--frambuesa); color: var(--papel); }
+.siguiente-parada__direccion { font-size: var(--t-l); margin: 0; }
+.siguiente-parada .nota { margin: 0; }
+.siguiente-parada__productos { margin: 0; padding-left: 1.2rem; font-size: var(--t-s); }
+.siguiente-parada__botones { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-2); margin-top: var(--espacio-2); }
+
+/* Producción de mañana */
+.produccion { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: var(--espacio-5); align-items: start; }
+.produccion__resumen { position: sticky; top: var(--espacio-4); }
+.produccion__lista { list-style: none; margin: 0 0 var(--espacio-3); padding: 0; display: grid; gap: var(--espacio-2); }
+.produccion__lista li { display: flex; align-items: center; gap: var(--espacio-3); padding-bottom: var(--espacio-2); border-bottom: 1px dashed var(--borde); }
+.produccion__cantidad {
+  flex: none; min-width: 2.4rem; height: 2.4rem; border-radius: 999px; display: grid; place-items: center;
+  background: var(--frambuesa-clara); color: var(--frambuesa-oscura); font-family: var(--fuente-titulo); font-weight: 600; font-size: var(--t-l);
+}
+
+/* Movimientos: tabla */
+.chips--centrados { justify-content: center; }
+.tabla-contenedor { padding: 0; overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; font-size: var(--t-s); }
+.tabla th { text-align: left; font-weight: 600; padding: var(--espacio-3) var(--espacio-4); background: var(--caramelo-claro); color: var(--caramelo-oscuro); white-space: nowrap; }
+.tabla td { padding: var(--espacio-3) var(--espacio-4); border-top: 1px solid var(--borde); vertical-align: top; }
+.tabla tbody tr:hover { background: var(--vainilla); }
+.tabla__numero { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
+.tabla__numero--mas { color: var(--pistacho-oscuro); }
+.tabla__numero--menos { color: var(--alerta); }
+.tipo-mov { display: inline-block; border-radius: 999px; padding: 0.1rem 0.6rem; font-size: var(--t-xs); font-weight: 600; white-space: nowrap; }
+.tipo-mov--entrada { background: var(--pistacho-claro); color: var(--pistacho-oscuro); }
+.tipo-mov--salida { background: var(--arandano-claro); color: var(--arandano); }
+.tipo-mov--ajuste { background: var(--alerta-clara); color: var(--alerta-oscura); }
+.tipo-mov--devolucion { background: var(--lavanda-claro); color: var(--lavanda); }
+
+/* Entregados */
+.entregas-grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--espacio-4); }
+.tarjeta-entrega { position: relative; overflow: hidden; padding: var(--espacio-4) var(--espacio-5); box-shadow: inset 4px 0 0 var(--pistacho), var(--sombra-papel); }
+.tarjeta-entrega > :not(.comanda__sello) { position: relative; }
+.tarjeta-entrega .comanda__sello svg { width: 90px; height: 90px; top: 8px; right: -18px; }
+.tarjeta-entrega__evidencias { display: flex; gap: var(--espacio-3); flex-wrap: wrap; margin-top: var(--espacio-2); }
+.tarjeta-entrega__evidencias figure { margin: 0; }
+.tarjeta-entrega__evidencias img { height: 64px; width: auto; max-width: 140px; object-fit: cover; border: 1px dashed var(--borde); border-radius: 6px; background: var(--papel); }
+.tarjeta-entrega__evidencias figcaption { font-size: var(--t-xs); color: var(--chocolate-suave); }
+
+/* Historial de despachos: datos de cada entrega */
+.tarjeta-entrega__datos { display: grid; gap: 0.2rem; margin: var(--espacio-2) 0 0; font-size: var(--t-s); }
+.tarjeta-entrega__datos > div { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: var(--espacio-2); }
+.tarjeta-entrega__datos dt { font-weight: 600; color: var(--chocolate-suave); }
+.tarjeta-entrega__datos dd { margin: 0; }
+.etiqueta-a-tiempo { background: var(--pistacho-claro); color: var(--pistacho-oscuro); font-weight: 600; border-radius: 999px; padding: 0 0.5rem; font-size: var(--t-xs); }
+
+/* Confirmar contraseña antes de entrar a Administración */
+.verificar-admin { max-width: 440px; margin: 0 auto; text-align: center; padding: var(--espacio-6); }
+.verificar-admin .campo { text-align: left; }
+.verificar-admin__icono {
+  width: 56px; height: 56px; color: var(--marco-tablero); margin: 0 auto var(--espacio-2); display: block;
+  fill: none; stroke: currentColor; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round;
+}
+.verificar-admin .ventana__acciones { justify-content: center; }
+
+/* Destacar lo que se pidió desde Inicio (columna del Kanban o formulario de Bodega) */
+.columna--destacada { box-shadow: 0 0 0 4px var(--frambuesa), 0 2px 0 rgba(30, 15, 12, 0.18); }
+.panel--destacado { box-shadow: 0 0 0 3px var(--frambuesa); }
+
+@media (max-width: 900px) {
+  .reparto-inicio, .produccion { grid-template-columns: 1fr; }
+  .reparto-inicio__lateral { margin-top: 0; }
+  .produccion__resumen { position: static; }
+}
+
+/* =================================================================
    VENTANAS (modales) — se usa el elemento <dialog> del navegador,
    que ya mantiene el foco dentro y se cierra con Escape.
    ================================================================= */
@@ -762,8 +1107,10 @@ a.cifra:hover { border-color: var(--frambuesa); }
    ================================================================= */
 .catalogo-lista {
   list-style: none; margin: 0 auto; padding: 0;
-  display: grid; gap: 1.5rem; max-width: 820px;
+  display: grid; gap: 1.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));   /* 2 productos por fila */
 }
+@media (max-width: 960px) { .catalogo-lista { grid-template-columns: 1fr; max-width: 640px; } }
 /* Ficha: la foto va de fondo a la izquierda y se desvanece hacia la derecha;
    el texto queda encima, con un halo claro suave para leerse sobre la foto. */
 .ficha {
@@ -780,12 +1127,15 @@ a.cifra:hover { border-color: var(--frambuesa); }
   position: absolute;
   top: 0; bottom: 0; left: 0;
   width: 58%;
+  overflow: hidden;               /* la foto acercada no se sale de su espacio */
 }
 .ficha__fondo .foto {
   width: 100%; height: 100%;
   aspect-ratio: auto;
   object-fit: cover;
   border-radius: 0;
+  transform: scale(1.12);          /* acerca un poco la foto: el borde inferior queda fuera */
+  transform-origin: 50% 30%;
 }
 .ficha__fondo .foto--vacia span { font-size: 4rem; opacity: 0.6; }
 .ficha__fondo::after {        /* sombreado que funde la foto con la tarjeta */

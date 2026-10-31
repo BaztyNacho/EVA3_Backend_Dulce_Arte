@@ -1,0 +1,55 @@
+{% extends 'web/base.html' %}
+{% load dulce %}
+
+{% block titulo %}{% if rol == 'admin' %}Historial de despachos{% else %}Entregados{% endif %}{% endblock %}
+
+{% block titulo_banner %}{% if rol == 'admin' %}Historial de despachos{% else %}Entregados{% endif %}{% endblock %}
+{% block subtitulo_banner %}Cada entrega con quién la recibió, a qué hora, en qué ruta y la evidencia (firma o comprobante).{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <nav class="chips" aria-label="Filtrar por período">
+      {% for valor, nombre in periodos %}
+        <a class="chip" href="?periodo={{ valor }}" {% if valor == periodo %}aria-current="true"{% endif %}>{{ nombre }}</a>
+      {% endfor %}
+    </nav>
+  </div>
+{% endblock %}
+
+{% block contenido %}
+{% if entregas %}
+  <div class="entregas-grilla">
+    {% for despacho in entregas %}
+      <article class="tarjeta-despacho tarjeta-despacho--entregado tarjeta-entrega">
+        {% include 'web/_sello.html' with estado='entregado' %}
+        <strong>Pedido #{{ despacho.pedido_id }} · {{ despacho.pedido.cliente.nombre }}</strong>
+        <span>{{ despacho.pedido.direccion_entrega }}</span>
+
+        <dl class="tarjeta-entrega__datos">
+          <div><dt>Recibió</dt><dd>{{ despacho.nombre_receptor }}</dd></div>
+          <div><dt>Entregado</dt><dd>{{ despacho.fecha_entrega_real|date:"D j M, H:i" }}
+            {% if despacho.atraso %}<span class="etiqueta-reponer">Con atraso</span>{% else %}<span class="etiqueta-a-tiempo">A tiempo</span>{% endif %}</dd></div>
+          <div><dt>Programado</dt><dd>{{ despacho.pedido.fecha_entrega|date:"D j M, H:i" }}</dd></div>
+          {% if despacho.ruta %}<div><dt>Ruta</dt><dd>{{ despacho.ruta.nombre }}{% if despacho.ruta.responsable %} · {{ despacho.ruta.responsable.get_full_name|default:despacho.ruta.responsable.username }}{% endif %}</dd></div>{% endif %}
+          <div><dt>Productos</dt><dd>{% for detalle in despacho.pedido.detalles.all %}{{ detalle.cantidad }} × {{ detalle.producto.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</dd></div>
+          <div><dt>Total</dt><dd>{{ despacho.pedido.total|clp }}</dd></div>
+        </dl>
+
+        <div class="tarjeta-entrega__evidencias">
+          {% if despacho.firma %}
+            <figure><img src="{{ despacho.firma.url }}" alt="Firma de {{ despacho.nombre_receptor }}"><figcaption>Firma</figcaption></figure>
+          {% endif %}
+          {% if despacho.comprobante %}
+            <figure><a href="{{ despacho.comprobante.url }}" target="_blank" rel="noopener"><img src="{{ despacho.comprobante.url }}" alt="Foto del comprobante del pedido {{ despacho.pedido_id }}"></a><figcaption>Comprobante</figcaption></figure>
+          {% endif %}
+        </div>
+        {% if despacho.observaciones %}<p class="nota">Observaciones: {{ despacho.observaciones }}</p>{% endif %}
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="panel vacio">
+    <p>No hay entregas en este período.</p>
+    <a class="boton boton--secundario" href="?periodo=todo">Ver todas las entregas</a>
+  </div>
+{% endif %}
+{% endblock %}

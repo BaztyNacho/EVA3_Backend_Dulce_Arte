@@ -12,7 +12,13 @@ from rest_framework.response import Response
 from inventario.models import Insumo
 
 from .models import Cliente, Pedido
-from .permisos import EsAdministrador, PermisosDelModelo, ProtegidoContraBorradoMixin
+from .permisos import (
+    AdminSoloLectura,
+    EsAdminOCocina,
+    EsAdministrador,
+    PermisosDelModelo,
+    ProtegidoContraBorradoMixin,
+)
 from .serializers import (
     ClienteSerializer,
     ImagenReferenciaSerializer,
@@ -37,7 +43,7 @@ class ClienteViewSet(ProtegidoContraBorradoMixin, viewsets.ModelViewSet):
     """
 
     serializer_class = ClienteSerializer
-    permission_classes = [PermisosDelModelo]
+    permission_classes = [PermisosDelModelo, AdminSoloLectura]
     queryset = Cliente.objects.all()
 
     def get_queryset(self):
@@ -55,7 +61,7 @@ class PedidoViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = PedidoSerializer
-    permission_classes = [PermisosDelModelo]
+    permission_classes = [PermisosDelModelo, AdminSoloLectura]
     queryset = (
         Pedido.objects.select_related('cliente', 'creado_por')
         .prefetch_related(
@@ -108,13 +114,13 @@ class PedidoViewSet(viewsets.ModelViewSet):
         return self._ejecutar(confirmar_cotizacion)
 
     @extend_schema(request=None, responses=PedidoSerializer)
-    @action(detail=True, methods=['post'], permission_classes=[EsAdministrador])
+    @action(detail=True, methods=['post'], permission_classes=[EsAdminOCocina])
     def avanzar(self, request, pk=None):
         """Mueve el pedido a la siguiente columna del Kanban."""
         return self._ejecutar(avanzar_estado)
 
     @extend_schema(request=MotivoSerializer, responses=PedidoSerializer)
-    @action(detail=True, methods=['post'], url_path='rechazar-calidad', permission_classes=[EsAdministrador])
+    @action(detail=True, methods=['post'], url_path='rechazar-calidad', permission_classes=[EsAdminOCocina])
     def rechazar_calidad(self, request, pk=None):
         """Rechaza en Control de Calidad: el pedido vuelve a En Preparación."""
         motivo = MotivoSerializer(data=request.data)
@@ -173,7 +179,7 @@ class PedidoViewSet(viewsets.ModelViewSet):
         return Response(PedidoSerializer(pedido, context=self.get_serializer_context()).data)
 
     @extend_schema(responses=PedidoKanbanSerializer(many=True))
-    @action(detail=False, methods=['get'], permission_classes=[EsAdministrador])
+    @action(detail=False, methods=['get'], permission_classes=[EsAdminOCocina])
     def kanban(self, request):
         """Pedidos agrupados por columna del tablero de cocina."""
         pedidos = (

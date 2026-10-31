@@ -1,0 +1,113 @@
+{% extends 'web/base.html' %}
+{% load static %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block titulo_banner %}Hola, {{ user.first_name|default:user.username }}{% endblock %}
+{% block subtitulo_banner %}{% if ruta %}{{ ruta.nombre }} · {{ ruta.entregados }} de {{ ruta.total }} entregado{{ ruta.total|pluralize }}{% else %}{% now "l j \d\e F" %}{% endif %}{% endblock %}
+
+{% block contenido %}
+<div class="reparto-inicio">
+
+  {# ---------- Principal: la ruta del día y la siguiente parada ---------- #}
+  <section class="reparto-inicio__ruta" aria-labelledby="t-mi-ruta">
+    <h2 id="t-mi-ruta" class="inicio__titulo">Mi ruta de hoy</h2>
+
+    {% if ruta %}
+      <div class="marco">
+        {% if siguiente and ruta.estado == 'en_curso' %}
+          {# Tarjeta grande con la parada que toca entregar ahora #}
+          <article class="siguiente-parada" aria-labelledby="t-siguiente">
+            <span class="siguiente-parada__etiqueta">Siguiente parada</span>
+            <h3 id="t-siguiente"><span class="parada-ruta__numero">{{ siguiente.orden }}</span> {{ siguiente.pedido.cliente.nombre }}</h3>
+            <p class="siguiente-parada__direccion">{{ siguiente.pedido.direccion_entrega }}</p>
+            <p class="nota">Entregar a las {{ siguiente.pedido.fecha_entrega|date:"H:i" }} · Pedido #{{ siguiente.pedido_id }}</p>
+            <ul class="siguiente-parada__productos">
+              {% for detalle in siguiente.pedido.detalles.all %}<li>{{ detalle.cantidad }} × {{ detalle.producto.nombre }}</li>{% endfor %}
+            </ul>
+            <div class="siguiente-parada__botones">
+              <a class="boton boton--secundario" target="_blank" rel="noopener"
+                 href="https://www.google.com/maps/search/?api=1&query={{ siguiente.pedido.direccion_entrega|urlencode }}">Mapa</a>
+              <a class="boton boton--secundario" href="tel:{{ siguiente.pedido.cliente.telefono|cut:' ' }}">Llamar</a>
+            </div>
+            <a class="boton boton--grande" href="{% url 'despacho_entrega' siguiente.pk %}">Entregar con firma</a>
+          </article>
+        {% endif %}
+
+        <article class="hoja-ruta" aria-labelledby="ruta-{{ ruta.pk }}">
+          <header class="hoja-ruta__cabecera">
+            <div>
+              <h3 id="ruta-{{ ruta.pk }}">{{ ruta.nombre }}</h3>
+              <span class="nota">{{ ruta.fecha|date:"l j \d\e F" }}</span>
+            </div>
+            <span class="estado estado--{% if ruta.estado == 'en_curso' %}en_preparacion{% else %}recibido{% endif %}">{{ ruta.get_estado_display }}</span>
+          </header>
+          {% if ruta.total %}
+            <div class="hoja-ruta__avance">
+              <span>{{ ruta.entregados }} de {{ ruta.total }} entregado{{ ruta.total|pluralize }}</span>
+              <div class="hoja-ruta__barra" role="progressbar" aria-valuemin="0" aria-valuemax="{{ ruta.total }}" aria-valuenow="{{ ruta.entregados }}" aria-label="Avance de la ruta">
+                <span style="width: {{ ruta.porcentaje }}%"></span>
+              </div>
+            </div>
+            <ol class="hoja-ruta__paradas">
+              {% for despacho in ruta.paradas %}
+                <li class="parada-ruta{% if despacho.estado == 'entregado' %} parada-ruta--hecha{% elif despacho.pk == siguiente.pk and ruta.estado == 'en_curso' %} parada-ruta--siguiente{% endif %}">
+                  <span class="parada-ruta__numero" aria-hidden="true">{% if despacho.estado == 'entregado' %}✓{% else %}{{ forloop.counter }}{% endif %}</span>
+                  <div class="parada-ruta__datos">
+                    <strong>{{ despacho.pedido.cliente.nombre }}</strong>
+                    <span class="nota">{{ despacho.pedido.direccion_entrega }} · {{ despacho.pedido.fecha_entrega|date:"H:i" }}</span>
+                  </div>
+                  <div class="parada-ruta__accion">
+                    {% if despacho.estado == 'entregado' %}<span class="nota">Entregado {{ despacho.fecha_entrega_real|date:"H:i" }}</span>{% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ol>
+          {% else %}
+            <p class="nota hoja-ruta__vacia">La ruta aún no tiene paradas. Agrégalas en "Mi ruta".</p>
+          {% endif %}
+          <div class="hoja-ruta__pie">
+            {% if ruta.estado == 'planificada' and ruta.total %}
+              <button class="boton boton--grande" type="button" data-ruta-estado="en_curso" data-ruta="{{ ruta.pk }}">Iniciar ruta</button>
+            {% elif ruta.completa %}
+              <button class="boton boton--grande" type="button" data-ruta-estado="finalizada" data-ruta="{{ ruta.pk }}">Finalizar ruta</button>
+            {% endif %}
+          </div>
+        </article>
+      </div>
+    {% else %}
+      <div class="marco">
+        <p class="marco__vacio">No tienes una ruta para hoy. Revisa los pedidos por despachar en "Mi ruta".</p>
+        <a class="boton boton--secundario ancho-completo boton--sobre-marco" href="{% url 'despachos' %}">Ir a Mi ruta</a>
+      </div>
+    {% endif %}
+  </section>
+
+  {# ---------- Lateral: accesos y resumen ---------- #}
+  <aside class="reparto-inicio__lateral" aria-label="Accesos y resumen">
+    <nav class="accesos accesos--compactos" aria-label="Acceso rápido">
+      <a class="acceso-rapido" href="{% url 'despachos' %}">
+        <svg aria-hidden="true"><use href="#icono-ruta"/></svg><span>Mi ruta</span>
+      </a>
+      <a class="acceso-rapido" href="{% url 'entregados' %}">
+        <svg aria-hidden="true"><use href="#icono-entregados"/></svg><span>Entregados</span>
+      </a>
+    </nav>
+    <div class="marco espacio-arriba">
+      <a class="cifra" href="{% url 'despachos' %}?dia=todas">
+        <strong>{{ por_asignar }}</strong><span>pedidos sin ruta</span>
+      </a>
+      <a class="cifra" href="{% url 'entregados' %}">
+        <strong>{{ entregados_hoy }}</strong><span>entregados hoy</span>
+      </a>
+      <a class="cifra" href="{% url 'despachos' %}?dia=todas">
+        <strong>{{ rutas_abiertas }}</strong><span>rutas abiertas</span>
+      </a>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'web/js/despachos.js' %}"></script>
+{% endblock %}

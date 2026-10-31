@@ -8,7 +8,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from pedidos.permisos import (
-    EsAdministrador,
+    AdminOBodegaSoloLectura,
+    EsAdminOBodega,
     PermisosDelModelo,
     ProtegidoContraBorradoMixin,
     es_administrador,
@@ -30,7 +31,7 @@ class InsumoViewSet(ProtegidoContraBorradoMixin, viewsets.ModelViewSet):
 
     queryset = Insumo.objects.all()
     serializer_class = InsumoSerializer
-    permission_classes = [EsAdministrador]
+    permission_classes = [AdminOBodegaSoloLectura]
 
     @action(detail=False, methods=['get'], url_path='stock-bajo')
     def stock_bajo(self, request):
@@ -80,7 +81,7 @@ class MovimientoInsumoViewSet(
     """
 
     serializer_class = MovimientoInsumoSerializer
-    permission_classes = [EsAdministrador]
+    permission_classes = [EsAdminOBodega]
     queryset = MovimientoInsumo.objects.select_related('insumo', 'usuario')
 
     def get_queryset(self):

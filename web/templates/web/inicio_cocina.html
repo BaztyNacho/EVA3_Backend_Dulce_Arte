@@ -1,0 +1,64 @@
+{% extends 'web/base.html' %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block clase_pagina %}pagina--ancha{% endblock %}
+
+{% block titulo_banner %}Hola, {{ user.first_name|default:user.username }}{% endblock %}
+{% block subtitulo_banner %}{% now "l j \d\e F" %}. Esto es lo que hay en la cocina.{% endblock %}
+{% block opciones_banner %}
+  <div class="banner__opciones">
+    <a class="boton" href="{% url 'kanban' %}">Abrir tablero de cocina</a>
+  </div>
+{% endblock %}
+
+{% block contenido %}
+<div class="inicio">
+
+  {# ---------- Izquierda: pedidos urgentes ---------- #}
+  <section class="inicio__entregas" aria-labelledby="t-urgentes">
+    <h2 id="t-urgentes" class="inicio__titulo">Urgentes (menos de 3 h)</h2>
+    <div class="marco">
+      {% for pedido in urgentes %}
+        {% include 'web/_comanda.html' %}
+      {% empty %}
+        <p class="marco__vacio">No hay pedidos urgentes. ¡Vamos bien!</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  {# ---------- Centro: menú de acceso rápido ---------- #}
+  <section class="inicio__menu" aria-labelledby="t-menu">
+    <h2 id="t-menu" class="oculto-visual">Acceso rápido</h2>
+    <nav class="accesos" aria-label="Acceso rápido">
+      <a class="acceso-rapido" href="{% url 'kanban' %}">
+        <svg aria-hidden="true"><use href="#icono-tablero"/></svg><span>Tablero de cocina</span>
+      </a>
+      <a class="acceso-rapido" href="{% url 'pedidos_lista' %}?estado=cocina">
+        <svg aria-hidden="true"><use href="#icono-pedidos"/></svg><span>Pedidos en cocina</span>
+      </a>
+      <a class="acceso-rapido" href="{% url 'produccion_manana' %}">
+        <svg aria-hidden="true"><use href="#icono-manana"/></svg><span>Producción de mañana</span>
+      </a>
+      <a class="acceso-rapido" href="{% url 'kanban' %}?etapa=control_calidad">
+        <svg aria-hidden="true"><use href="#icono-calidad"/></svg><span>Control de calidad</span>
+      </a>
+    </nav>
+  </section>
+
+  {# ---------- Derecha: pedidos por etapa ---------- #}
+  <section class="inicio__cifras" aria-label="Pedidos por etapa">
+    <div class="marco">
+      {% for estado, nombre, cantidad in etapas %}
+        <a class="cifra cifra--etapa" href="{% url 'kanban' %}?etapa={{ estado }}">
+          {% include 'web/_sello.html' with estado=estado %}
+          <strong>{{ cantidad }}</strong><span>{{ nombre|lower }}</span>
+        </a>
+      {% endfor %}
+      <a class="cifra" href="{% url 'produccion_manana' %}">
+        <strong>{{ para_manana }}</strong><span>para mañana</span>
+      </a>
+    </div>
+  </section>
+</div>
+{% endblock %}
