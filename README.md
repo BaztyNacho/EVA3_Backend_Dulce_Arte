@@ -131,6 +131,7 @@ python manage.py migrate
 python manage.py crear_roles        # grupos Administrador, Atención y Ventas, Cocina, Bodega y Repartidor
 python manage.py cargar_catalogo    # 30 insumos, 11 productos con receta, 18 extras y fotos
 python manage.py createsuperuser
+python manage.py cargar_demo        # (opcional) clientes, pedidos en todas las etapas, rutas y entregas de ejemplo
 
 # 6. Ejecutar
 python manage.py runserver

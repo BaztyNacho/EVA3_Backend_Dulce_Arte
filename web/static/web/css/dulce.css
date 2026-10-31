@@ -198,21 +198,61 @@ img { max-width: 100%; display: block; }
 }
 .nav a:hover { background: var(--barra-hover); color: var(--papel); }
 .nav a[aria-current='page'] { background: var(--frambuesa); color: var(--papel); }
-.usuario { display: flex; align-items: center; gap: var(--espacio-3); font-size: var(--t-s); color: var(--barra-texto-suave); line-height: 1.3; text-align: right; }
-.usuario small { display: block; font-size: var(--t-xs); }
-/* En escritorio: nombre arriba y "Cerrar sesión" debajo, para dejar espacio a los enlaces */
-@media (min-width: 1241px) {
-  .usuario { flex-direction: column; align-items: flex-end; gap: 0.25rem; }
-  .usuario small { display: inline; }
-  .usuario small::before { content: '· '; }
-  .usuario form button { padding: 0.15rem 0.65rem; font-size: var(--t-xs); }
+/* Tarjeta del usuario: botón crema con nombre e insignia del rol; al hacer clic se abre su ficha */
+.usuario { position: relative; flex: none; }
+.usuario__boton {
+  display: flex; align-items: center; gap: var(--espacio-2);
+  background: var(--caramelo-claro); color: var(--chocolate);
+  border: 0; border-radius: 999px; padding: 0.3rem 0.45rem 0.3rem 0.3rem;
+  font: inherit; font-size: var(--t-s); cursor: pointer; white-space: nowrap;
+  box-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.15s ease, transform 0.15s cubic-bezier(0.2, 0, 0, 1);
 }
-.usuario form { margin: 0; }
-.usuario button {
-  background: none; border: 1px solid var(--barra-linea); color: var(--barra-texto);
-  padding: 0.3rem 0.7rem; border-radius: 999px; cursor: pointer; font: inherit; white-space: nowrap;
+.usuario__boton:hover { background: var(--papel); }
+.usuario__boton:active { transform: scale(0.98); }
+.usuario__boton[aria-expanded='true'] { background: var(--papel); }
+.usuario__avatar {
+  flex: none; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--chocolate); color: var(--caramelo-claro);
+  font-family: var(--fuente-titulo); font-weight: 600; font-size: var(--t-xs); letter-spacing: 0.02em;
 }
-.usuario button:hover { border-color: var(--caramelo); color: var(--papel); }
+.usuario__avatar--grande { width: 3rem; height: 3rem; font-size: var(--t-m); }
+.usuario__nombre { font-weight: 600; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; }
+
+/* Insignia del rol, con un color por rol */
+.rol-insignia {
+  display: inline-block; border-radius: 999px; padding: 0.1rem 0.6rem;
+  font-size: var(--t-xs); font-weight: 600; white-space: nowrap; line-height: 1.5;
+}
+.rol-insignia--admin { background: var(--frambuesa); color: var(--papel); }
+.rol-insignia--ventas { background: var(--caramelo); color: var(--chocolate); }
+.rol-insignia--cocina { background: var(--horno-claro); color: var(--horno); }
+.rol-insignia--bodega { background: var(--pistacho-claro); color: var(--pistacho-oscuro); }
+.rol-insignia--repartidor { background: var(--arandano-claro); color: var(--arandano); }
+
+/* Ficha que se abre bajo el botón */
+.usuario__tarjeta {
+  position: absolute; right: 0; top: calc(100% + 10px); z-index: 20;
+  width: 270px; text-align: left;
+  background: var(--papel); color: var(--chocolate);
+  border-radius: 14px; padding: var(--espacio-4);
+  box-shadow: 0 18px 40px -16px rgba(30, 15, 12, 0.65);
+}
+.usuario__tarjeta::before {          /* piquito que apunta al botón */
+  content: ''; position: absolute; top: -7px; right: 26px;
+  width: 14px; height: 14px; background: var(--papel); transform: rotate(45deg); border-radius: 3px;
+}
+.usuario__cabecera { display: flex; align-items: center; gap: var(--espacio-3); }
+.usuario__cabecera strong { display: block; font-family: var(--fuente-titulo); font-size: var(--t-l); line-height: 1.2; margin-bottom: 0.2rem; }
+.usuario__datos { margin: var(--espacio-4) 0; display: grid; gap: var(--espacio-2); font-size: var(--t-s); }
+.usuario__datos > div { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: var(--espacio-2); }
+.usuario__datos dt { color: var(--chocolate-suave); font-weight: 500; }
+.usuario__datos dd { margin: 0; overflow-wrap: anywhere; }
+.usuario__salir { margin: 0; padding-top: var(--espacio-3); border-top: 1px dashed var(--borde); }
+@media (prefers-reduced-motion: no-preference) {
+  .usuario__tarjeta:not([hidden]) { animation: ventana-entrar 0.18s cubic-bezier(0.2, 0, 0, 1); }
+}
 
 /* Pantallas medianas y celular: logo arriba, enlaces centrados debajo */
 @media (max-width: 1240px) {
@@ -227,6 +267,8 @@ img { max-width: 100%; display: block; }
   .nav, .nav--izquierda { justify-content: center; }
   .barra__derecha { display: contents; }
   .usuario { margin-top: var(--espacio-1); }
+  .usuario__tarjeta { right: auto; left: 50%; margin-left: -135px; }
+  .usuario__tarjeta::before { right: calc(50% - 7px); }
 }
 
 /* ---------------- Banner con el título de la página (en todas las pantallas) ---------------- */
