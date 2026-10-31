@@ -25,10 +25,10 @@
             <ul class="siguiente-parada__productos">
               {% for detalle in siguiente.pedido.detalles.all %}<li>{{ detalle.cantidad }} × {{ detalle.producto.nombre }}</li>{% endfor %}
             </ul>
+            {# Mapa de la dirección; "Ampliar mapa" abre Google Maps completo #}
+            {% include 'web/_mapa.html' with direccion=siguiente.pedido.direccion_entrega %}
             <div class="siguiente-parada__botones">
-              <a class="boton boton--secundario" target="_blank" rel="noopener"
-                 href="https://www.google.com/maps/search/?api=1&query={{ siguiente.pedido.direccion_entrega|urlencode }}">Mapa</a>
-              <a class="boton boton--secundario" href="tel:{{ siguiente.pedido.cliente.telefono|cut:' ' }}">Llamar</a>
+              <a class="boton boton--secundario" href="tel:{{ siguiente.pedido.cliente.telefono|cut:' ' }}">Llamar al cliente</a>
             </div>
             <a class="boton boton--grande" href="{% url 'despacho_entrega' siguiente.pk %}">Entregar con firma</a>
           </article>

@@ -992,7 +992,19 @@ a.cifra:hover { border-color: var(--frambuesa); }
 .siguiente-parada__direccion { font-size: var(--t-l); margin: 0; }
 .siguiente-parada .nota { margin: 0; }
 .siguiente-parada__productos { margin: 0; padding-left: 1.2rem; font-size: var(--t-s); }
-.siguiente-parada__botones { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacio-2); margin-top: var(--espacio-2); }
+.siguiente-parada__botones { display: grid; grid-template-columns: 1fr; gap: var(--espacio-2); }
+
+/* Mapa de la dirección de entrega (Inicio del repartidor y pantalla de entrega) */
+.mapa { margin: var(--espacio-2) 0; border-radius: var(--radio); overflow: hidden; border: 1px solid var(--borde); background: var(--fondo-medidor); }
+.mapa__marco { display: block; width: 100%; height: 240px; border: 0; }
+.mapa__pie {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--espacio-3);
+  padding: var(--espacio-2) var(--espacio-3); background: var(--papel); font-size: var(--t-s);
+}
+.mapa__direccion { min-width: 0; overflow-wrap: anywhere; color: var(--chocolate-suave); }
+.mapa__pie .boton { flex: none; }
+.comanda .mapa { position: relative; }
+@media (max-width: 640px) { .mapa__marco { height: 200px; } }
 
 /* Producción de mañana */
 .produccion { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: var(--espacio-5); align-items: start; }

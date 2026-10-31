@@ -1,0 +1,20 @@
+{% comment %}
+  Mapa de la dirección de entrega (Google Maps incrustado, no necesita clave de API).
+  Recibe "direccion". Se agrega ", Santiago, Chile" para que Google ubique bien la calle.
+  El botón "Ampliar mapa" abre Google Maps completo (en el celular, la app de mapas).
+{% endcomment %}
+{% with consulta=direccion|add:", Santiago, Chile"|urlencode %}
+<figure class="mapa">
+  <iframe class="mapa__marco"
+          src="https://www.google.com/maps?q={{ consulta }}&z=16&output=embed"
+          title="Mapa de {{ direccion }}"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen></iframe>
+  <figcaption class="mapa__pie">
+    <span class="mapa__direccion">{{ direccion }}</span>
+    <a class="boton boton--chico boton--secundario" target="_blank" rel="noopener"
+       href="https://www.google.com/maps/search/?api=1&query={{ consulta }}">Ampliar mapa</a>
+  </figcaption>
+</figure>
+{% endwith %}
